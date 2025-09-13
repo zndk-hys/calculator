@@ -25,7 +25,6 @@ function calcReducer(state, action) {
                 ...state,
                 state: 'input_int',
                 operandRight: inputNum,
-                display: inputNum,
             };
         }
 
@@ -34,7 +33,6 @@ function calcReducer(state, action) {
             return {
                 ...state,
                 operandRight: newVal,
-                display: newVal,
             };
         }
 
@@ -43,7 +41,6 @@ function calcReducer(state, action) {
             state: 'init',
             operandLeft: null,
             operandRight: null,
-            display: '0',
             operator: null,
         };
     } else if (action.type === 'operatorKey') {
@@ -70,7 +67,6 @@ function calcReducer(state, action) {
 
         if (state.state === 'input_int' || state.state === 'input_frac') {
             let newOperandLeft = state.operandRight;
-            let newDisplay = state.operandRight;
             if ( state.operandLeft && state.operator ) {
                 try {
                     newOperandLeft = calcFormula(state.operandLeft, state.operandRight, state.operator);
@@ -78,19 +74,15 @@ function calcReducer(state, action) {
                     return {
                         ...state,
                         state: 'error',
-                        display: 'error',
                         operandLeft: null,
                         operandRight: null,
                         operator: null,
                     }
                 }
-
-                newDisplay = newOperandLeft;
             }
             return {
                 ...state,
                 state: 'pend_right',
-                display: newDisplay,
                 operandLeft: newOperandLeft,
                 operandRight: null,
                 operator,
@@ -113,7 +105,6 @@ function calcReducer(state, action) {
                     return {
                         ...state,
                         state: 'result',
-                        display: result,
                         operandLeft: null,
                         operandRight: result,
                         operator:  null,
@@ -122,7 +113,6 @@ function calcReducer(state, action) {
                     return {
                         ...state,
                         state: 'error',
-                        display: 'error',
                         operandLeft: null,
                         operandRight: null,
                         operator: null,
@@ -137,7 +127,6 @@ function calcReducer(state, action) {
                 ...state,
                 state: 'input_frac',
                 operandRight: '0.',
-                display: '0.',
             };
         }
 
@@ -146,7 +135,6 @@ function calcReducer(state, action) {
                 ...state,
                 state: 'input_frac',
                 operandRight: state.operandRight + '.',
-                display: state.operandRight + '.',
             };
         }
 
@@ -157,10 +145,20 @@ function calcReducer(state, action) {
     return state;
 }
 
+function getDisplayValue(state) {
+    switch(state.state) {
+        case 'init': return '0';
+        case 'input_int': return state.operandRight;
+        case 'input_frac': return state.operandRight;
+        case 'pend_right': return state.operandLeft;
+        case 'result': return state.operandRight;
+        case 'error': return 'error';
+    }
+}
+
 export default function Calc() {
     const [state, dispatch] = useReducer(calcReducer, {
         state: 'init', // init | intput_int | input_frac | pend_right | result | error
-        display: '0',
         operandLeft: null,
         operandRight: null,
         operator: null,
@@ -174,6 +172,8 @@ export default function Calc() {
             }
         })
     }
+
+    const displayValue = getDisplayValue(state);
 
     const handleClearKey = e => {
         dispatch({
@@ -204,9 +204,7 @@ export default function Calc() {
     
     return (
         <div>
-            <p>
-                <input type="text" value={state.display} />
-            </p>
+            <p>{displayValue}</p>
             <input type="button" value="0" onClick={handleNumKey} />
             <input type="button" value="1" onClick={handleNumKey} />
             <input type="button" value="2" onClick={handleNumKey} />
@@ -226,7 +224,6 @@ export default function Calc() {
             <input type="button" value="=" onClick={handleEqualKey} /><br />
             <div>
                 state: {state.state}<br />
-                display: {state.display}<br />
                 operandLeft: {state.operandLeft}<br />
                 operandRight: {state.operandRight}<br />
                 operator: {state.operator}
