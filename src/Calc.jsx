@@ -47,6 +47,13 @@ function calcReducer(state, action) {
         const operator = action.payload.kind;
 
         if (state.state === 'init' || state.state === 'error' ) {
+            if ( operator === '-' ) {
+                return {
+                    ...state,
+                    state: 'input_int',
+                    operandRight: '-',
+                }
+            }
             return {
                 ...state,
                 state: 'pend_right',
@@ -90,14 +97,20 @@ function calcReducer(state, action) {
         }
 
         if (state.state === 'pend_right') {
-            return {
-                ...state,
-                operator,
+            if ( operator === '-' ) {
+                return {
+                    ...state,
+                    state: 'input_int',
+                    operandRight: '-',
+                }
             }
+            return state;
         }
 
     } else if (action.type === 'equalKey') {
         if (state.state === 'input_int' || state.state === 'input_frac') {
+            if ( state.operandRight === '-' ) return state;
+            
             if ( state.operandLeft && state.operator ) {
                 try {
                     const result = calcFormula(state.operandLeft, state.operandRight, state.operator);
