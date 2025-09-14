@@ -17,13 +17,14 @@ function calcFormula(leftOperand, rightOperand, operator) {
 }
 
 /**
- * |desc\src   |init       |input_int  |input_franc|pend_right |result     |error      |
- * |init       |o          |o          |o          |o          |o          |o          |
- * |input_int  |o          |o          |x          |o          |o          |o          |
- * |input_franc|o          |o          |o          |o          |o          |o          |
- * |pend_right |o          |o          |o          |o          |o          |o          |
- * |result     |x          |o          |o          |x          |x          |x          |
- * |error      |x          |o          |o          |x          |x          |x          |
+ * |desc\src   |init       |input_int  |input_franc|pend_op    |pend_right |result     |error      |
+ * |init       |o          |o          |o          |o          |o          |o          |o          |
+ * |input_int  |o          |o          |x          |o          |o          |o          |o          |
+ * |input_franc|o          |o          |o          |o          |o          |o          |o          |
+ * |pend_op    |o          |o          |o          |o          |o          |o          |o          |
+ * |pend_right |o          |o          |o          |o          |o          |o          |o          |
+ * |result     |x          |o          |o          |o          |x          |x          |x          |
+ * |error      |x          |o          |o          |o          |x          |x          |x          |
  * 
  * @param {*} state 
  * @param {*} action 
@@ -33,7 +34,7 @@ function calcReducer(state, action) {
     if (action.type === 'numKey') {
         const inputNum = String(action.payload.num);
         
-        if (state.state === 'init' || state.state === 'pend_right' || state.state === 'result' || state.state === 'error' ) {
+        if (state.state === 'init' || state.state === 'pend_right' || state.state === 'pend_op' || state.state === 'result' || state.state === 'error' ) {
             return {
                 ...state,
                 state: 'input_int',
@@ -51,6 +52,7 @@ function calcReducer(state, action) {
 
     } else if (action.type === 'clearKey') {
         return {
+            ...state,
             state: 'init',
             operandLeft: null,
             operandRight: null,
@@ -84,7 +86,7 @@ function calcReducer(state, action) {
             }
         }
 
-        if (state.state === 'input_int' || state.state === 'input_frac') {
+        if (state.state === 'input_int' || state.state === 'input_frac' || state.state === 'pend_op' ) {
             let newOperandLeft = state.operandRight;
             if ( state.operandLeft && state.operator ) {
                 try {
@@ -120,7 +122,7 @@ function calcReducer(state, action) {
         }
 
     } else if (action.type === 'equalKey') {
-        if (state.state === 'input_int' || state.state === 'input_frac') {
+        if (state.state === 'input_int' || state.state === 'input_frac' || state.state === 'pend_op') {
             if ( state.operandRight === '-' ) return state;
             
             if ( state.operandLeft && state.operator ) {
@@ -145,7 +147,7 @@ function calcReducer(state, action) {
         }
         
     } else if (action.type === 'dotKey') {
-        if (state.state === 'init' || state.state === 'pend_right' || state.state === 'result' || state.state === 'error' ) {
+        if (state.state === 'init' || state.state === 'pend_right' || state.state === 'pend_op' || state.state === 'result' || state.state === 'error' ) {
             return {
                 ...state,
                 state: 'input_frac',
@@ -164,6 +166,39 @@ function calcReducer(state, action) {
         if (state.state === 'input_frac') {
             return state;
         }
+
+    } else if (action.type === 'memoryKey') {
+        const operator = action.payload.kind === 'M+' ? '+' : '-';
+        if (state.state === 'input_int' || state.state === 'input_frac' || state.state === 'pend_op' || state.state === 'result' ) {
+            try {
+                const result = calcFormula(state.memory, state.operandRight, operator);
+
+                return {
+                    ...state,
+                    state: 'pend_op',
+                    memory: result,
+                }
+            } catch {
+                return {
+                    ...state,
+                    state: 'error',
+                    operandLeft: null,
+                    operandRight: null,
+                    operator: null,
+                }
+            }
+        }
+    } else if (action.type === 'memoryRecallKey') {
+        return {
+            ...state,
+            state: 'pend_op',
+            operandRight: state.memory,
+        }
+    } else if (action.type === 'memoryClearKey') {
+        return {
+            ...state,
+            memory: '0',
+        }
     }
     return state;
 }
@@ -174,6 +209,7 @@ function getDisplayValue(state) {
         case 'input_int': return state.operandRight;
         case 'input_frac': return state.operandRight;
         case 'pend_right': return state.operandLeft;
+        case 'pend_op': return state.operandRight;
         case 'result': return state.operandLeft;
         case 'error': return 'error';
     }
@@ -185,6 +221,7 @@ export default function Calc() {
         operandLeft: null,
         operandRight: null,
         operator: null,
+        memory: '0',
     });
 
     const handleNumKey = e => {
@@ -224,6 +261,27 @@ export default function Calc() {
             type: 'dotKey',
         });
     }
+
+    const handleMemoryKey = e => {
+        dispatch({
+            type: 'memoryKey',
+            payload: {
+                kind: e.target.value,
+            }
+        });
+    }
+
+    const handleMemoryRecallKey = e => {
+        dispatch({
+            type: 'memoryRecallKey',
+        });
+    }
+
+    const handleMemoryClearKey = e => {
+        dispatch({
+            type: 'memoryClearKey',
+        })
+    }
     
     return (
         <div>
@@ -244,12 +302,17 @@ export default function Calc() {
             <input type="button" value="-" onClick={handleOperatorKey} />
             <input type="button" value="*" onClick={handleOperatorKey} />
             <input type="button" value="/" onClick={handleOperatorKey} /><br />
+            <input type="button" value="M+" onClick={handleMemoryKey} />
+            <input type="button" value="M-" onClick={handleMemoryKey} />
+            <input type="button" value="MR" onClick={handleMemoryRecallKey} />
+            <input type="button" value="MC" onClick={handleMemoryClearKey} /><br />
             <input type="button" value="=" onClick={handleEqualKey} /><br />
             <div>
                 state: {state.state}<br />
                 operandLeft: {state.operandLeft}<br />
                 operandRight: {state.operandRight}<br />
-                operator: {state.operator}
+                operator: {state.operator}<br />
+                memory: {state.memory}
             </div>
         </div>
     );
