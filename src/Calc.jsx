@@ -16,6 +16,19 @@ function calcFormula(leftOperand, rightOperand, operator) {
     return String(answer);
 }
 
+/**
+ * |desc\src   |init       |input_int  |input_franc|pend_right |result     |error      |
+ * |init       |o          |o          |o          |o          |o          |o          |
+ * |input_int  |o          |o          |x          |o          |o          |o          |
+ * |input_franc|o          |o          |o          |o          |o          |o          |
+ * |pend_right |o          |o          |o          |o          |o          |o          |
+ * |result     |x          |o          |o          |x          |x          |x          |
+ * |error      |x          |o          |o          |x          |x          |x          |
+ * 
+ * @param {*} state 
+ * @param {*} action 
+ * @returns 
+ */
 function calcReducer(state, action) {
     if (action.type === 'numKey') {
         const inputNum = String(action.payload.num);
