@@ -16,6 +16,195 @@ function calcFormula(leftOperand, rightOperand, operator) {
     return String(answer);
 }
 
+function handleNumAction(state, action) {
+    const inputNum = String(action.payload.num);
+        
+    if (state.state === 'init' || state.state === 'pend_right' || state.state === 'pend_op' || state.state === 'result' || state.state === 'error' ) {
+        return {
+            ...state,
+            state: 'input_int',
+            operandRight: inputNum,
+        };
+    }
+
+    if (state.state === 'input_int' || state.state === 'input_frac') {
+        const newVal = state.operandRight === '0' ? inputNum : state.operandRight + inputNum;
+        return {
+            ...state,
+            operandRight: newVal,
+        };
+    }
+
+    return state;
+}
+
+function handleOperatorAction(state, action) {
+    const operator = action.payload.kind;
+
+    if (state.state === 'init' || state.state === 'error' ) {
+        if ( operator === '-' ) {
+            return {
+                ...state,
+                state: 'input_int',
+                operandRight: '-',
+            }
+        }
+        return {
+            ...state,
+            state: 'pend_right',
+            operandLeft: '0',
+            operandRight: null,
+            operator,
+        }
+    }
+
+    if (state.state === 'result') {
+        return {
+            ...state,
+            state: 'pend_right',
+            operator,
+        }
+    }
+
+    if (state.state === 'input_int' || state.state === 'input_frac' || state.state === 'pend_op' ) {
+        let newOperandLeft = state.operandRight;
+        if ( state.operandLeft && state.operator ) {
+            try {
+                newOperandLeft = calcFormula(state.operandLeft, state.operandRight, state.operator);
+            } catch {
+                return {
+                    ...state,
+                    state: 'error',
+                    operandLeft: null,
+                    operandRight: null,
+                    operator: null,
+                }
+            }
+        }
+        return {
+            ...state,
+            state: 'pend_right',
+            operandLeft: newOperandLeft,
+            operandRight: null,
+            operator,
+        }
+    }
+
+    if (state.state === 'pend_right') {
+        if ( operator === '-' ) {
+            return {
+                ...state,
+                state: 'input_int',
+                operandRight: '-',
+            }
+        }
+    }
+
+    return state;
+}
+
+function handleEqualAction(state, action) {
+    if (state.state === 'input_int' || state.state === 'input_frac' || state.state === 'pend_op') {
+        if ( state.operandRight === '-' ) return state;
+        
+        if ( state.operandLeft && state.operator ) {
+            try {
+                const result = calcFormula(state.operandLeft, state.operandRight, state.operator);
+
+                return {
+                    ...state,
+                    state: 'result',
+                    operandLeft: result,
+                }
+            } catch {
+                return {
+                    ...state,
+                    state: 'error',
+                    operandLeft: null,
+                    operandRight: null,
+                    operator: null,
+                }
+            }
+        }
+    }
+
+    return state;
+}
+
+function handleClearAction(state, action) {
+    return {
+        ...state,
+        state: 'init',
+        operandLeft: null,
+        operandRight: null,
+        operator: null,
+    };
+}
+
+function handleDotAction(state, action) {
+    if (state.state === 'init' || state.state === 'pend_right' || state.state === 'pend_op' || state.state === 'result' || state.state === 'error' ) {
+        return {
+            ...state,
+            state: 'input_frac',
+            operandRight: '0.',
+        };
+    }
+
+    if (state.state === 'input_int') {
+        return {
+            ...state,
+            state: 'input_frac',
+            operandRight: state.operandRight + '.',
+        };
+    }
+
+    if (state.state === 'input_frac') {
+        return state;
+    }
+
+    return state;
+}
+
+function handleMemoryAction(state, action) {
+    const operator = action.payload.kind === 'M+' ? '+' : '-';
+    if (state.state === 'input_int' || state.state === 'input_frac' || state.state === 'pend_op' || state.state === 'result' ) {
+        try {
+            const result = calcFormula(state.memory, state.operandRight, operator);
+
+            return {
+                ...state,
+                state: 'pend_op',
+                memory: result,
+            }
+        } catch {
+            return {
+                ...state,
+                state: 'error',
+                operandLeft: null,
+                operandRight: null,
+                operator: null,
+            }
+        }
+    }
+
+    return state;
+}
+
+function handleMemoryRecallAction(state, action) {
+    return {
+        ...state,
+        state: 'pend_op',
+        operandRight: state.memory,
+    }
+}
+
+function handleMemoryClearAction(state, action) {
+    return {
+        ...state,
+        memory: '0',
+    }
+}
+
 /**
  * |desc\src   |init       |input_int  |input_franc|pend_op    |pend_right |result     |error      |
  * |init       |o          |o          |o          |o          |o          |o          |o          |
@@ -31,176 +220,16 @@ function calcFormula(leftOperand, rightOperand, operator) {
  * @returns 
  */
 function calcReducer(state, action) {
-    if (action.type === 'numKey') {
-        const inputNum = String(action.payload.num);
-        
-        if (state.state === 'init' || state.state === 'pend_right' || state.state === 'pend_op' || state.state === 'result' || state.state === 'error' ) {
-            return {
-                ...state,
-                state: 'input_int',
-                operandRight: inputNum,
-            };
-        }
-
-        if (state.state === 'input_int' || state.state === 'input_frac') {
-            const newVal = state.operandRight === '0' ? inputNum : state.operandRight + inputNum;
-            return {
-                ...state,
-                operandRight: newVal,
-            };
-        }
-
-    } else if (action.type === 'clearKey') {
-        return {
-            ...state,
-            state: 'init',
-            operandLeft: null,
-            operandRight: null,
-            operator: null,
-        };
-    } else if (action.type === 'operatorKey') {
-        const operator = action.payload.kind;
-
-        if (state.state === 'init' || state.state === 'error' ) {
-            if ( operator === '-' ) {
-                return {
-                    ...state,
-                    state: 'input_int',
-                    operandRight: '-',
-                }
-            }
-            return {
-                ...state,
-                state: 'pend_right',
-                operandLeft: '0',
-                operandRight: null,
-                operator,
-            }
-        }
-
-        if (state.state === 'result') {
-            return {
-                ...state,
-                state: 'pend_right',
-                operator,
-            }
-        }
-
-        if (state.state === 'input_int' || state.state === 'input_frac' || state.state === 'pend_op' ) {
-            let newOperandLeft = state.operandRight;
-            if ( state.operandLeft && state.operator ) {
-                try {
-                    newOperandLeft = calcFormula(state.operandLeft, state.operandRight, state.operator);
-                } catch {
-                    return {
-                        ...state,
-                        state: 'error',
-                        operandLeft: null,
-                        operandRight: null,
-                        operator: null,
-                    }
-                }
-            }
-            return {
-                ...state,
-                state: 'pend_right',
-                operandLeft: newOperandLeft,
-                operandRight: null,
-                operator,
-            }
-        }
-
-        if (state.state === 'pend_right') {
-            if ( operator === '-' ) {
-                return {
-                    ...state,
-                    state: 'input_int',
-                    operandRight: '-',
-                }
-            }
-            return state;
-        }
-
-    } else if (action.type === 'equalKey') {
-        if (state.state === 'input_int' || state.state === 'input_frac' || state.state === 'pend_op') {
-            if ( state.operandRight === '-' ) return state;
-            
-            if ( state.operandLeft && state.operator ) {
-                try {
-                    const result = calcFormula(state.operandLeft, state.operandRight, state.operator);
-
-                    return {
-                        ...state,
-                        state: 'result',
-                        operandLeft: result,
-                    }
-                } catch {
-                    return {
-                        ...state,
-                        state: 'error',
-                        operandLeft: null,
-                        operandRight: null,
-                        operator: null,
-                    }
-                }
-            }
-        }
-        
-    } else if (action.type === 'dotKey') {
-        if (state.state === 'init' || state.state === 'pend_right' || state.state === 'pend_op' || state.state === 'result' || state.state === 'error' ) {
-            return {
-                ...state,
-                state: 'input_frac',
-                operandRight: '0.',
-            };
-        }
-
-        if (state.state === 'input_int') {
-            return {
-                ...state,
-                state: 'input_frac',
-                operandRight: state.operandRight + '.',
-            };
-        }
-
-        if (state.state === 'input_frac') {
-            return state;
-        }
-
-    } else if (action.type === 'memoryKey') {
-        const operator = action.payload.kind === 'M+' ? '+' : '-';
-        if (state.state === 'input_int' || state.state === 'input_frac' || state.state === 'pend_op' || state.state === 'result' ) {
-            try {
-                const result = calcFormula(state.memory, state.operandRight, operator);
-
-                return {
-                    ...state,
-                    state: 'pend_op',
-                    memory: result,
-                }
-            } catch {
-                return {
-                    ...state,
-                    state: 'error',
-                    operandLeft: null,
-                    operandRight: null,
-                    operator: null,
-                }
-            }
-        }
-    } else if (action.type === 'memoryRecallKey') {
-        return {
-            ...state,
-            state: 'pend_op',
-            operandRight: state.memory,
-        }
-    } else if (action.type === 'memoryClearKey') {
-        return {
-            ...state,
-            memory: '0',
-        }
+    switch (action.type) {
+        case 'numKey' : return handleNumAction(state, action);
+        case 'clearKey' : return handleClearAction(state, action);
+        case 'operatorKey' : return handleOperatorAction(state, action);
+        case 'equalKey' : return handleEqualAction(state, action);
+        case 'dotKey' : return handleDotAction(state, action);
+        case 'memoryKey' : return handleMemoryAction(state, action);
+        case 'memoryRecallKey' : return handleMemoryRecallAction(state, action);
+        case 'memoryClearKey' : return handleMemoryClearAction(state, action);
     }
-    return state;
 }
 
 function getDisplayValue(state) {
@@ -217,12 +246,14 @@ function getDisplayValue(state) {
 
 export default function Calc() {
     const [state, dispatch] = useReducer(calcReducer, {
-        state: 'init', // init | intput_int | input_frac | pend_right | result | error
+        state: 'init', // init | intput_int | input_frac | pend_op | pend_right | result | error
         operandLeft: null,
         operandRight: null,
         operator: null,
         memory: '0',
     });
+
+    const displayValue = getDisplayValue(state);
 
     const handleNumKey = e => {
         dispatch({
@@ -232,8 +263,6 @@ export default function Calc() {
             }
         })
     }
-
-    const displayValue = getDisplayValue(state);
 
     const handleClearKey = e => {
         dispatch({
