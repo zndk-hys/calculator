@@ -67,7 +67,6 @@ function calcReducer(state, action) {
             return {
                 ...state,
                 state: 'pend_right',
-                operandLeft: state.operandRight,
                 operator,
             }
         }
@@ -118,9 +117,7 @@ function calcReducer(state, action) {
                     return {
                         ...state,
                         state: 'result',
-                        operandLeft: null,
-                        operandRight: result,
-                        operator:  null,
+                        operandLeft: result,
                     }
                 } catch {
                     return {
@@ -164,7 +161,7 @@ function getDisplayValue(state) {
         case 'input_int': return state.operandRight;
         case 'input_frac': return state.operandRight;
         case 'pend_right': return state.operandLeft;
-        case 'result': return state.operandRight;
+        case 'result': return state.operandLeft;
         case 'error': return 'error';
     }
 }
