@@ -14,10 +14,13 @@ function handleNumAction(state, action) {
     const inputNum = String(action.payload.kind);
         
     if (state.state === states.INIT || state.state === states.PEND_R || state.state === states.PEND_OP || state.state === states.RESULT || state.state === states.ERROR ) {
+        // RESULT → 数値入力の場合はオペレーターをリセット
+        const operator = state.state === states.RESULT ? null : state.operator;
         return {
             ...state,
             state: states.IN_INT,
             operandRight: inputNum,
+            operator,
         };
     }
 
