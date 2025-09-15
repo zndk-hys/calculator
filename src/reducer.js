@@ -1,6 +1,6 @@
 import { actions } from "./actions";
 import { states } from "./states";
-import { calcFormula } from "./utils";
+import { calcFormula, numLength } from "./utils";
 
 export const initialState = {
     state: states.INIT, // init | intput_int | input_frac | pend_op | pend_right | result | error
@@ -25,6 +25,11 @@ function handleNumAction(state, action) {
     }
 
     if (state.state === states.IN_INT || state.state === states.IN_FRAC) {
+        // 最大桁数以上の入力は無効
+        if ( numLength(state.operandRight) >= state.length ) {
+            return state;
+        }
+
         const newVal = state.operandRight === '0' ? inputNum : state.operandRight + inputNum;
         return {
             ...state,
@@ -68,6 +73,17 @@ function handleOperatorAction(state, action) {
         if ( state.operandLeft && state.operator ) {
             try {
                 newOperandLeft = calcFormula(state.operandLeft, state.operandRight, state.operator);
+                if ( numLength( newOperandLeft ) > state.length ) {
+                    throw new Error('too long');
+                }
+
+                return {
+                    ...state,
+                    state: states.PEND_R,
+                    operandLeft: newOperandLeft,
+                    operandRight: null,
+                    operator,
+                }
             } catch {
                 return {
                     ...state,
@@ -78,6 +94,7 @@ function handleOperatorAction(state, action) {
                 }
             }
         }
+
         return {
             ...state,
             state: states.PEND_R,
@@ -107,6 +124,10 @@ function handleEqualAction(state, action) {
         if ( state.operandLeft && state.operator ) {
             try {
                 const result = calcFormula(state.operandLeft, state.operandRight, state.operator);
+
+                if ( numLength( result ) > state.length ) {
+                    throw new Error('too long');
+                }
 
                 return {
                     ...state,

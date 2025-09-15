@@ -4,8 +4,11 @@ import Keypad from './Keypad';
 import { calcReducer, initialState } from '../reducer';
 import { actions } from '../actions';
 
-export default function Calc() {
-    const [state, dispatch] = useReducer(calcReducer, initialState);
+export default function Calc({length}) {
+    const [state, dispatch] = useReducer(calcReducer, {
+        ...initialState,
+        length,
+    });
     
     return (
         <div>

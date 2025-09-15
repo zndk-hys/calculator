@@ -10,3 +10,8 @@ export function calcFormula(leftOperand, rightOperand, operator) {
     if (operator === '/') answer = left.dividedBy(right);
     return answer.toFixed();
 }
+
+
+export function numLength(num) {
+    return num.replaceAll('.', '').length;
+}

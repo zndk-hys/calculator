@@ -1,4 +1,5 @@
 import { states } from "../states";
+import SegmentsDisplay from "./SegmentsDisplay";
 
 export default function Display({state}) {
     let display = '';
@@ -14,6 +15,9 @@ export default function Display({state}) {
     }
 
     return (
-        <p>{display}</p>
+        <>
+            <p>{display}</p>
+            <SegmentsDisplay value={display} length={state.length} />
+        </>
     )
 }

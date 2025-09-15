@@ -1,0 +1,82 @@
+.segmentDisplayContainer {
+    display: flex;
+}
+
+.segmentDisplay {
+    display: flex;
+    gap: 3px;
+    background: #fafafa;
+}
+
+.segments {
+    width: 26px;
+    height: 37px;
+    position: relative;
+    box-sizing: border-box;
+}
+
+.segments .segment {
+    position: absolute;
+    background: #eee;
+}
+
+.segments .segment.isActive {
+    background: black;
+    z-index: 1;
+}
+
+.segments .segment.segment--a {
+    top: 0;
+    left: 0;
+    width: 20px;
+    height: 3px;
+}
+
+.segments .segment.segment--b {
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 20px;
+}
+
+.segments .segment.segment--c {
+    top: 0;
+    left: 17px;
+    width: 3px;
+    height: 20px;
+}
+
+.segments .segment.segment--d {
+    top: 17px;
+    left: 0;
+    width: 20px;
+    height: 3px;
+}
+
+.segments .segment.segment--e {
+    top: 17px;
+    left: 0;
+    width: 3px;
+    height: 20px;
+}
+
+.segments .segment.segment--f {
+    top: 17px;
+    left: 17px;
+    width: 3px;
+    height: 20px;
+}
+
+.segments .segment.segment--g {
+    top: 34px;
+    left: 0px;
+    width: 20px;
+    height: 3px;
+}
+
+.segments .segment.segment--h {
+    top: 34px;
+    left: 23px;
+    width: 3px;
+    height: 3px;
+}
