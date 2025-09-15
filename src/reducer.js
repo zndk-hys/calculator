@@ -140,10 +140,13 @@ function handleClearAction(state, action) {
 
 function handleDotAction(state, action) {
     if (state.state === states.INIT || state.state === states.PEND_R || state.state === states.PEND_OP || state.state === states.RESULT || state.state === states.ERROR ) {
+        // RESULT → 小数点入力の場合はオペレーターをリセット
+        const operator = state.state === states.RESULT ? null : state.operator;
         return {
             ...state,
             state: states.IN_FRAC,
             operandRight: '0.',
+            operator,
         };
     }
 
