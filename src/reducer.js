@@ -101,7 +101,7 @@ function handleOperatorAction(state, action) {
 }
 
 function handleEqualAction(state, action) {
-    if (state.state === states.IN_INT || state.state === states.IN_FRAC || state.state === states.PEND_OP) {
+    if (state.state === states.IN_INT || state.state === states.IN_FRAC || state.state === states.PEND_OP || state.state === states.RESULT) {
         if ( state.operandRight === '-' ) return state;
         
         if ( state.operandLeft && state.operator ) {
