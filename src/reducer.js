@@ -150,6 +150,16 @@ function handleEqualAction(state, action) {
 }
 
 function handleClearAction(state, action) {
+    if (state.state === states.IN_INT || state.state === states.IN_FRAC || state.state === states.RESULT) {
+        return {
+            ...state,
+            state: states.IN_INT,
+            operandRight: '0',
+        };
+    }
+}
+
+function handleAllClearAction(state, action) {
     return {
         ...state,
         state: states.INIT,
@@ -244,6 +254,7 @@ export function calcReducer(state, action) {
     switch (action.type) {
         case actions.NUM        : return handleNumAction(state, action);
         case actions.CLEAR      : return handleClearAction(state, action);
+        case actions.All_CLEAR  : return handleAllClearAction(state, action);
         case actions.OP         : return handleOperatorAction(state, action);
         case actions.EQUAL      : return handleEqualAction(state, action);
         case actions.DOT        : return handleDotAction(state, action);

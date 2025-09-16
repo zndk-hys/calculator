@@ -16,6 +16,7 @@ export default function Calc({length}) {
             <Keypad
                 onNum={e => dispatch({type: actions.NUM, payload: {kind: e.target.value}})}
                 onClear={e => dispatch({type: actions.CLEAR})}
+                onAllClear={e => dispatch({type: actions.All_CLEAR})}
                 onDot={e => dispatch({type: actions.DOT})}
                 onOperator={e => dispatch({type: actions.OP, payload: {kind: e.target.value}})}
                 onMemory={e => dispatch({type: actions.MEM, payload: {kind: e.target.value}})}

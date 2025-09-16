@@ -1,4 +1,4 @@
-export default function Keypad({onNum, onClear, onDot, onOperator, onEqual, onMemory, onMemoryRecall, onMemoryClear}) {
+export default function Keypad({onNum, onClear, onAllClear, onDot, onOperator, onEqual, onMemory, onMemoryRecall, onMemoryClear}) {
     return (
         <div>
             <input type="button" value="0" onClick={onNum} />
@@ -11,7 +11,8 @@ export default function Keypad({onNum, onClear, onDot, onOperator, onEqual, onMe
             <input type="button" value="7" onClick={onNum} />
             <input type="button" value="8" onClick={onNum} />
             <input type="button" value="9" onClick={onNum} />
-            <input type="button" value="C" onClick={onClear} /><br />
+            <input type="button" value="C" onClick={onClear} />
+            <input type="button" value="AC" onClick={onAllClear} /><br />
             <input type="button" value="." onClick={onDot} /><br />
             <input type="button" value="+" onClick={onOperator} />
             <input type="button" value="-" onClick={onOperator} />
