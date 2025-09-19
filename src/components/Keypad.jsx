@@ -1,4 +1,17 @@
-export default function Keypad({onNum, onClear, onAllClear, onDot, onOperator, onEqual, onMemory, onMemoryRecall, onMemoryClear, onStartInvader}) {
+import { actions } from "../actions";
+
+export default function Keypad({dispatch}) {
+    const onNum = (e) => dispatch({type: actions.NUM, payload: {kind: e.target.value}});
+    const onClear = () => dispatch({type: actions.CLEAR});
+    const onAllClear = () => dispatch({type: actions.All_CLEAR});
+    const onDot= () => dispatch({type: actions.DOT});
+    const onOperator = (e) => dispatch({type: actions.OP, payload: {kind: e.target.value}});
+    const onMemory = (e) => dispatch({type: actions.MEM, payload: {kind: e.target.value}});
+    const onMemoryRecall = () => dispatch({type: actions.MEM_RECALL});
+    const onMemoryClear = () => dispatch({type: actions.MEM_CLEAR});
+    const onEqual = () => dispatch({type: actions.EQUAL});
+    const onStartInvader = () => dispatch({type: actions.INV_START});
+
     return (
         <div>
             <input type="button" value="0" onClick={onNum} />

@@ -17,18 +17,7 @@ export default function Calc({length}) {
     return (
         <div>
             <Display state={state} />
-            <Keypad
-                onNum={e => dispatch({type: actions.NUM, payload: {kind: e.target.value}})}
-                onClear={() => dispatch({type: actions.CLEAR})}
-                onAllClear={() => dispatch({type: actions.All_CLEAR})}
-                onDot={() => dispatch({type: actions.DOT})}
-                onOperator={e => dispatch({type: actions.OP, payload: {kind: e.target.value}})}
-                onMemory={e => dispatch({type: actions.MEM, payload: {kind: e.target.value}})}
-                onMemoryRecall={() => dispatch({type: actions.MEM_RECALL})}
-                onMemoryClear={() => dispatch({type: actions.MEM_CLEAR})}
-                onEqual={() => dispatch({type: actions.EQUAL})}
-                onStartInvader={() => dispatch({type: actions.INV_START})}
-            />
+            <Keypad dispatch={dispatch} />
             <div>
                 state: {state.state}<br />
                 operandLeft: {state.operandLeft}<br />
