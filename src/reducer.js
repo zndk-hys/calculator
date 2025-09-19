@@ -165,7 +165,7 @@ function handleOperatorAction(state, action) {
     return state;
 }
 
-function handleEqualAction(state, action) {
+function handleEqualAction(state) {
     if (state.state === states.IN_INT || state.state === states.IN_FRAC || state.state === states.PEND_OP || state.state === states.RESULT) {
         if ( state.operandRight === '-' ) return state;
         
@@ -197,7 +197,7 @@ function handleEqualAction(state, action) {
     return state;
 }
 
-function handleClearAction(state, action) {
+function handleClearAction(state) {
     if (state.state === states.IN_INT || state.state === states.IN_FRAC || state.state === states.RESULT) {
         return {
             ...state,
@@ -207,7 +207,7 @@ function handleClearAction(state, action) {
     }
 }
 
-function handleAllClearAction(state, action) {
+function handleAllClearAction(state) {
     return {
         ...state,
         state: states.INIT,
@@ -217,7 +217,7 @@ function handleAllClearAction(state, action) {
     };
 }
 
-function handleDotAction(state, action) {
+function handleDotAction(state) {
     if (state.state === states.INIT || state.state === states.PEND_R || state.state === states.PEND_OP || state.state === states.RESULT || state.state === states.ERROR ) {
         // RESULT → 小数点入力の場合はオペレーターをリセット
         const operator = state.state === states.RESULT ? null : state.operator;
@@ -282,7 +282,7 @@ function handleMemoryAction(state, action) {
     return state;
 }
 
-function handleMemoryRecallAction(state, action) {
+function handleMemoryRecallAction(state) {
     return {
         ...state,
         state: states.PEND_OP,
@@ -290,7 +290,7 @@ function handleMemoryRecallAction(state, action) {
     }
 }
 
-function handleMemoryClearAction(state, action) {
+function handleMemoryClearAction(state) {
     return {
         ...state,
         memory: '0',
@@ -396,14 +396,14 @@ function handleEndInvaderAction(state) {
 export function calcReducer(state, action) {
     switch (action.type) {
         case actions.NUM        : return handleNumAction(state, action);
-        case actions.CLEAR      : return handleClearAction(state, action);
-        case actions.All_CLEAR  : return handleAllClearAction(state, action);
+        case actions.CLEAR      : return handleClearAction(state);
+        case actions.All_CLEAR  : return handleAllClearAction(state);
         case actions.OP         : return handleOperatorAction(state, action);
-        case actions.EQUAL      : return handleEqualAction(state, action);
-        case actions.DOT        : return handleDotAction(state, action);
+        case actions.EQUAL      : return handleEqualAction(state);
+        case actions.DOT        : return handleDotAction(state);
         case actions.MEM        : return handleMemoryAction(state, action);
-        case actions.MEM_RECALL : return handleMemoryRecallAction(state, action);
-        case actions.MEM_CLEAR  : return handleMemoryClearAction(state, action);
+        case actions.MEM_RECALL : return handleMemoryRecallAction(state);
+        case actions.MEM_CLEAR  : return handleMemoryClearAction(state);
         case actions.INV_START  : return handleStartInvaderAction(state);
         case actions.INV_PLAY   : return handlePlayInvaderAction(state);
         case actions.INV_TICK   : return handleTickInvaderAction(state, action);
