@@ -12,6 +12,5 @@ export const actions = {
     INV_START: 'start_invader',
     INV_PLAY: 'play_invader',
     INV_TICK: 'tick_invader',
-    INV_AIMING: 'aiming_invader',
     INV_END: 'end_invader',
 };

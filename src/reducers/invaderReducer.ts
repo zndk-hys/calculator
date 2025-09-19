@@ -1,26 +1,27 @@
 import { actions } from "../actions";
 import { contexts } from "../contexts";
+import { AppAction, InvTickAction, OperatorAction, State } from "../types";
 
-export default function invaderReducer(state, action) {
+export default function invaderReducer(state: State, action: AppAction) {
     switch (action.type) {
         case actions.INV_PLAY  : return handlePlayInvaderAction(state);
-        case actions.INV_TICK  : return handleTickInvaderAction(state, action);
+        case actions.INV_TICK  : return handleTickInvaderAction(state, action as InvTickAction);
         case actions.INV_END   : return handleEndInvaderAction(state);
         case actions.DOT       : return handleDotAction(state);
-        case actions.OP        : return handleOperatorAction(state, action);
-        case actions.All_CLEAR : return handleAllClearAction(state, action);
+        case actions.OP        : return handleOperatorAction(state, action as OperatorAction);
+        case actions.All_CLEAR : return handleAllClearAction(state);
         default: return state;
     }
 }
 
-function handlePlayInvaderAction(state) {
+function handlePlayInvaderAction(state: State): State {
     return {
         ...state,
         context: contexts.INV_PLAY,
     };
 }
 
-function handleTickInvaderAction(state, action) {
+function handleTickInvaderAction(state: State, action: InvTickAction): State {
     // 負け
     if (state.enemies.length === state.length - 4) {
         const life = state.life - 1;
@@ -79,7 +80,7 @@ function handleTickInvaderAction(state, action) {
     };
 }
 
-function handleEndInvaderAction(state) {
+function handleEndInvaderAction(state: State): State {
     return {
         ...state,
         context: contexts.INIT,
@@ -89,7 +90,7 @@ function handleEndInvaderAction(state) {
     };
 }
 
-function handleDotAction(state) {
+function handleDotAction(state: State): State {
     if (state.context === contexts.INV_PLAY) {
         let aim = '0';
         switch(state.aim) {
@@ -106,9 +107,9 @@ function handleDotAction(state) {
     return state;
 }
 
-function handleOperatorAction(state, action) {
+function handleOperatorAction(state: State, action: OperatorAction) {
     const operator = action.payload.kind;
-    
+
     if (state.context === contexts.INV_PLAY && operator === '+') {
         const aim = state.aim;
         const enemies = state.enemies;
@@ -147,7 +148,7 @@ function handleOperatorAction(state, action) {
     return state;
 }
 
-function handleAllClearAction(state) {
+function handleAllClearAction(state: State) {
     return {
         ...state,
         context: contexts.INIT,

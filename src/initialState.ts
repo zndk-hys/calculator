@@ -1,7 +1,8 @@
 import { contexts } from "./contexts";
+import { State } from "./types";
 
-const initialState = {
-    context: contexts.INIT, // init | intput_int | input_frac | pend_op | pend_right | result | error
+const initialState: State = {
+    context: contexts.INIT,
     operandLeft: null,
     operandRight: null,
     operator: null,

@@ -1,24 +1,25 @@
 import { actions } from "../actions";
 import { contexts } from "../contexts";
 import { calcFormula, numLength } from "../utils";
+import { State, AppAction, NumAction, OperatorAction, MemoryAction } from "../types";
 
-export default function calcuratorReducer(state, action) {
+export default function calcuratorReducer(state: State, action: AppAction): State {
     switch (action.type) {
-        case actions.NUM        : return handleNumAction(state, action);
+        case actions.NUM        : return handleNumAction(state, action as NumAction);
         case actions.CLEAR      : return handleClearAction(state);
         case actions.All_CLEAR  : return handleAllClearAction(state);
-        case actions.OP         : return handleOperatorAction(state, action);
+        case actions.OP         : return handleOperatorAction(state, action as OperatorAction);
         case actions.EQUAL      : return handleEqualAction(state);
         case actions.DOT        : return handleDotAction(state);
-        case actions.MEM        : return handleMemoryAction(state, action);
+        case actions.MEM        : return handleMemoryAction(state, action as MemoryAction);
         case actions.MEM_RECALL : return handleMemoryRecallAction(state);
         case actions.MEM_CLEAR  : return handleMemoryClearAction(state);
         case actions.INV_START : return handleStartInvaderAction(state);
-        default: return {};
+        default: return state;
     }
 }
 
-function handleNumAction(state, action) {
+function handleNumAction(state: State, action: NumAction): State {
     const inputNum = String(action.payload.kind);
         
     if (state.context !== contexts.IN_INT && state.context !== contexts.IN_FRAC) {
@@ -37,7 +38,7 @@ function handleNumAction(state, action) {
         // 追加入力時
 
         // 最大桁数以上の入力は無効
-        if ( numLength(state.operandRight) >= state.length ) {
+        if ( numLength(state.operandRight!) >= state.length ) {
             return state;
         }
 
@@ -49,7 +50,7 @@ function handleNumAction(state, action) {
     }
 }
 
-function handleOperatorAction(state, action) {
+function handleOperatorAction(state: State, action: OperatorAction): State {
     const operator = action.payload.kind;
 
     // 初期状態またはエラー状態の場合、全てのオペレーターを許容するが、
@@ -83,7 +84,7 @@ function handleOperatorAction(state, action) {
     // 入力中またはメモリ取得後の状態では全てのオペレータを許容し、必要であれば計算
     if (state.context === contexts.IN_INT || state.context === contexts.IN_FRAC || state.context === contexts.PEND_OP ) {
         let newOperandLeft = state.operandRight;
-        if ( state.operandLeft && state.operator ) {
+        if ( state.operandLeft && state.operandRight && state.operator ) {
             try {
                 newOperandLeft = calcFormula(state.operandLeft, state.operandRight, state.operator);
                 if ( numLength( newOperandLeft ) > state.length ) {
@@ -131,11 +132,11 @@ function handleOperatorAction(state, action) {
     return state;
 }
 
-function handleEqualAction(state) {
+function handleEqualAction(state: State): State {
     if (state.context === contexts.IN_INT || state.context === contexts.IN_FRAC || state.context === contexts.PEND_OP || state.context === contexts.RESULT) {
         if ( state.operandRight === '-' ) return state;
         
-        if ( state.operandLeft && state.operator ) {
+        if ( state.operandLeft && state.operandRight && state.operator ) {
             try {
                 const result = calcFormula(state.operandLeft, state.operandRight, state.operator);
 
@@ -163,7 +164,7 @@ function handleEqualAction(state) {
     return state;
 }
 
-function handleClearAction(state) {
+function handleClearAction(state: State): State {
     if (state.context === contexts.IN_INT || state.context === contexts.IN_FRAC || state.context === contexts.RESULT) {
         return {
             ...state,
@@ -171,9 +172,11 @@ function handleClearAction(state) {
             operandRight: '0',
         };
     }
+
+    return state;
 }
 
-function handleAllClearAction(state) {
+function handleAllClearAction(state: State): State {
     return {
         ...state,
         context: contexts.INIT,
@@ -183,7 +186,7 @@ function handleAllClearAction(state) {
     };
 }
 
-function handleDotAction(state) {
+function handleDotAction(state: State): State {
     // 未入力状態で.を押した際は「0.」として扱う
     if (state.context === contexts.INIT || state.context === contexts.PEND_R || state.context === contexts.PEND_OP || state.context === contexts.RESULT || state.context === contexts.ERROR ) {
         // RESULT → 小数点入力の場合はオペレーターをリセット
@@ -208,16 +211,18 @@ function handleDotAction(state) {
     return state;
 }
 
-function handleMemoryAction(state, action) {
+function handleMemoryAction(state: State, action: MemoryAction): State {
     const operator = action.payload.kind === 'M+' ? '+' : '-';
     if (state.context === contexts.IN_INT || state.context === contexts.IN_FRAC || state.context === contexts.PEND_OP || state.context === contexts.RESULT ) {
         try {
-            const result = calcFormula(state.memory, state.operandRight, operator);
-
-            return {
-                ...state,
-                context: contexts.PEND_OP,
-                memory: result,
+            if ( state.operandRight ) {
+                const result = calcFormula(state.memory, state.operandRight, operator);
+    
+                return {
+                    ...state,
+                    context: contexts.PEND_OP,
+                    memory: result,
+                }
             }
         } catch {
             return {
@@ -233,7 +238,7 @@ function handleMemoryAction(state, action) {
     return state;
 }
 
-function handleMemoryRecallAction(state) {
+function handleMemoryRecallAction(state: State): State {
     return {
         ...state,
         context: contexts.PEND_OP,
@@ -241,14 +246,14 @@ function handleMemoryRecallAction(state) {
     }
 }
 
-function handleMemoryClearAction(state) {
+function handleMemoryClearAction(state: State): State {
     return {
         ...state,
         memory: '0',
     }
 }
 
-function handleStartInvaderAction(state) {
+function handleStartInvaderAction(state: State): State {
     return {
         ...state,
         context: contexts.INV_POINT,

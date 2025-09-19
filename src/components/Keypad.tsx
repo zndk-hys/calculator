@@ -1,12 +1,18 @@
+import { MouseEvent } from "react";
 import { actions } from "../actions";
+import { AppAction } from "../types";
 
-export default function Keypad({dispatch}) {
-    const onNum = (e) => dispatch({type: actions.NUM, payload: {kind: e.target.value}});
+type KeypadProps = {
+    dispatch: React.ActionDispatch<[AppAction]>;
+}
+
+export default function Keypad({dispatch}: KeypadProps) {
+    const onNum = (e: MouseEvent<HTMLInputElement>) => dispatch({type: actions.NUM, payload: {kind: e.currentTarget.value}});
     const onClear = () => dispatch({type: actions.CLEAR});
     const onAllClear = () => dispatch({type: actions.All_CLEAR});
     const onDot= () => dispatch({type: actions.DOT});
-    const onOperator = (e) => dispatch({type: actions.OP, payload: {kind: e.target.value}});
-    const onMemory = (e) => dispatch({type: actions.MEM, payload: {kind: e.target.value}});
+    const onOperator = (e: MouseEvent<HTMLInputElement>) => dispatch({type: actions.OP, payload: {kind: e.currentTarget.value}});
+    const onMemory = (e: MouseEvent<HTMLInputElement>) => dispatch({type: actions.MEM, payload: {kind: e.currentTarget.value}});
     const onMemoryRecall = () => dispatch({type: actions.MEM_RECALL});
     const onMemoryClear = () => dispatch({type: actions.MEM_CLEAR});
     const onEqual = () => dispatch({type: actions.EQUAL});

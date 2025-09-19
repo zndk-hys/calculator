@@ -5,7 +5,11 @@ import useInvaderGame from '../hooks/useInvaderGame';
 import initialState from '../initialState';
 import rootReducer from '../reducers/rootReducer';
 
-export default function Calc({length}) {
+type CalcProps = {
+    length: number;
+}
+
+export default function Calc({length}: CalcProps) {
     const [state, dispatch] = useReducer(rootReducer, {
         ...initialState,
         length,

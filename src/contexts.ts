@@ -1,3 +1,5 @@
+import { State } from "./types";
+
 export const contexts = {
     INIT: 'init',
     IN_INT: 'input_int',
@@ -11,7 +13,7 @@ export const contexts = {
     INV_OVER: 'invader_gameover'
 }
 
-export function isCalculatorContext(state) {
+export function isCalculatorContext(state: State): boolean {
     return [
         contexts.INIT,
         contexts.IN_INT,
@@ -23,10 +25,10 @@ export function isCalculatorContext(state) {
     ].includes(state.context);
 }
 
-export function isInvaderContext(state) {
+export function isInvaderContext(state: State): boolean {
     return [
         contexts.INV_POINT,
         contexts.INV_PLAY,
         contexts.INV_POINT,
-    ]
+    ].includes(state.context);
 }

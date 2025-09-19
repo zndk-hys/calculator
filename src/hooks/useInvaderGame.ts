@@ -1,9 +1,10 @@
 import { useEffect, useRef } from "react";
 import { actions } from "../actions";
 import { contexts } from "../contexts";
+import { AppAction, State } from "../types";
 
-export default function useInvaderGame(state, dispatch) {
-    const tickTimerId = useRef();
+export default function useInvaderGame(state: State, dispatch: React.ActionDispatch<[AppAction]>): void {
+    const tickTimerId = useRef<number>(null);
 
     // INV_POINT になってから一定時間経過後、INV_PLAY をディスパッチ
     useEffect(() => {

@@ -1,6 +1,11 @@
 import Segment from "./Segment";
 
-export default function Segments({value, hasDot}) {
+type SegmentsProps = {
+    value: string;
+    hasDot: boolean;
+}
+
+export default function Segments({value, hasDot}: SegmentsProps) {
     let signals = [false, false, false, false, false, false, false, false];
 
     switch(value) {
