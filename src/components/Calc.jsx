@@ -1,12 +1,12 @@
 import { useReducer } from 'react';
 import Display from './Display';
 import Keypad from './Keypad';
-import { calcReducer, initialState } from '../reducer';
-import { actions } from '../actions';
 import useInvaderGame from '../hooks/useInvaderGame';
+import initialState from '../initialState';
+import rootReducer from '../reducers/rootReducer';
 
 export default function Calc({length}) {
-    const [state, dispatch] = useReducer(calcReducer, {
+    const [state, dispatch] = useReducer(rootReducer, {
         ...initialState,
         length,
     });
