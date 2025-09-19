@@ -24,7 +24,8 @@ export default function Calc({length}) {
                 operandRight: {state.operandRight}<br />
                 operator: {state.operator}<br />
                 memory: {state.memory}<br />
-                point: {state.point}
+                point: {state.point}<br />
+                popedEnemyNum: {state.popedEnemyNum}
             </div>
         </div>
     );

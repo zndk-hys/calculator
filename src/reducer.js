@@ -298,7 +298,7 @@ function handleMemoryClearAction(state) {
 }
 
 function handleStartInvaderAction(state) {
-
+    // 電卓モードの場合
     if (state.state !== states.INV_POINT && state.state !== states.INV_PLAY) {
         return {
             ...state,
@@ -308,13 +308,12 @@ function handleStartInvaderAction(state) {
             aim: '0',
             enemies: '',
             popedEnemyNum: 0,
+            point: 0,
+            comingUfo: false,
         }
     }
 
-    return {
-        ...state,
-        state: states.INV_POINT,
-    }
+    return state;
 }
 
 function handlePlayInvaderAction(state) {
@@ -325,6 +324,7 @@ function handlePlayInvaderAction(state) {
 }
 
 function handleTickInvaderAction(state, action) {
+    // 負け
     if (state.enemies.length === state.length - 4) {
         const life = state.life - 1;
 
@@ -343,6 +343,19 @@ function handleTickInvaderAction(state, action) {
                 ...state,
                 state: states.INV_OVER,
             }
+        }
+    }
+
+    // 勝ち
+    if (state.popedEnemyNum === 16 && state.enemies.trim().length === 0) {
+        return {
+            ...state,
+            state: states.INV_POINT,
+            stage: state.stage + 1,
+            aim: '0',
+            enemies: '',
+            popedEnemyNum: 0,
+            sumHitNum: 0,
         }
     }
 
