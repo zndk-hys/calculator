@@ -19,7 +19,7 @@ export default function Calc({length}) {
             <Display state={state} />
             <Keypad dispatch={dispatch} />
             <div>
-                state: {state.state}<br />
+                context: {state.context}<br />
                 operandLeft: {state.operandLeft}<br />
                 operandRight: {state.operandRight}<br />
                 operator: {state.operator}<br />

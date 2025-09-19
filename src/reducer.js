@@ -1,9 +1,9 @@
 import { actions } from "./actions";
-import { states } from "./states";
+import { contexts } from "./contexts";
 import { calcFormula, numLength } from "./utils";
 
 export const initialState = {
-    state: states.INIT, // init | intput_int | input_frac | pend_op | pend_right | result | error
+    context: contexts.INIT, // init | intput_int | input_frac | pend_op | pend_right | result | error
     operandLeft: null,
     operandRight: null,
     operator: null,
@@ -25,18 +25,18 @@ export const initialState = {
 function handleNumAction(state, action) {
     const inputNum = String(action.payload.kind);
         
-    if (state.state === states.INIT || state.state === states.PEND_R || state.state === states.PEND_OP || state.state === states.RESULT || state.state === states.ERROR ) {
+    if (state.context === contexts.INIT || state.context === contexts.PEND_R || state.context === contexts.PEND_OP || state.context === contexts.RESULT || state.context === contexts.ERROR ) {
         // RESULT → 数値入力の場合はオペレーターをリセット
-        const operator = state.state === states.RESULT ? null : state.operator;
+        const operator = state.context === contexts.RESULT ? null : state.operator;
         return {
             ...state,
-            state: states.IN_INT,
+            context: contexts.IN_INT,
             operandRight: inputNum,
             operator,
         };
     }
 
-    if (state.state === states.IN_INT || state.state === states.IN_FRAC) {
+    if (state.context === contexts.IN_INT || state.context === contexts.IN_FRAC) {
         // 最大桁数以上の入力は無効
         if ( numLength(state.operandRight) >= state.length ) {
             return state;
@@ -55,32 +55,32 @@ function handleNumAction(state, action) {
 function handleOperatorAction(state, action) {
     const operator = action.payload.kind;
 
-    if (state.state === states.INIT || state.state === states.ERROR ) {
+    if (state.context === contexts.INIT || state.context === contexts.ERROR ) {
         if ( operator === '-' ) {
             return {
                 ...state,
-                state: states.IN_INT,
+                context: contexts.IN_INT,
                 operandRight: '-',
             }
         }
         return {
             ...state,
-            state: states.PEND_R,
+            context: contexts.PEND_R,
             operandLeft: '0',
             operandRight: null,
             operator,
         }
     }
 
-    if (state.state === states.RESULT) {
+    if (state.context === contexts.RESULT) {
         return {
             ...state,
-            state: states.PEND_R,
+            context: contexts.PEND_R,
             operator,
         }
     }
 
-    if (state.state === states.IN_INT || state.state === states.IN_FRAC || state.state === states.PEND_OP ) {
+    if (state.context === contexts.IN_INT || state.context === contexts.IN_FRAC || state.context === contexts.PEND_OP ) {
         let newOperandLeft = state.operandRight;
         if ( state.operandLeft && state.operator ) {
             try {
@@ -91,7 +91,7 @@ function handleOperatorAction(state, action) {
 
                 return {
                     ...state,
-                    state: states.PEND_R,
+                    context: contexts.PEND_R,
                     operandLeft: newOperandLeft,
                     operandRight: null,
                     operator,
@@ -99,7 +99,7 @@ function handleOperatorAction(state, action) {
             } catch {
                 return {
                     ...state,
-                    state: states.ERROR,
+                    context: contexts.ERROR,
                     operandLeft: null,
                     operandRight: null,
                     operator: null,
@@ -109,25 +109,25 @@ function handleOperatorAction(state, action) {
 
         return {
             ...state,
-            state: states.PEND_R,
+            context: contexts.PEND_R,
             operandLeft: newOperandLeft,
             operandRight: null,
             operator,
         }
     }
 
-    if (state.state === states.PEND_R) {
+    if (state.context === contexts.PEND_R) {
         if ( operator === '-' ) {
             return {
                 ...state,
-                state: states.IN_INT,
+                context: contexts.IN_INT,
                 operandRight: '-',
             }
         }
     }
 
     // インベーダー：fire
-    if (state.state === states.INV_PLAY && operator === '+') {
+    if (state.context === contexts.INV_PLAY && operator === '+') {
         const aim = state.aim;
         const enemies = state.enemies;
         const padEnemies = enemies.padStart(state.length - 4, ' ');
@@ -166,7 +166,7 @@ function handleOperatorAction(state, action) {
 }
 
 function handleEqualAction(state) {
-    if (state.state === states.IN_INT || state.state === states.IN_FRAC || state.state === states.PEND_OP || state.state === states.RESULT) {
+    if (state.context === contexts.IN_INT || state.context === contexts.IN_FRAC || state.context === contexts.PEND_OP || state.context === contexts.RESULT) {
         if ( state.operandRight === '-' ) return state;
         
         if ( state.operandLeft && state.operator ) {
@@ -179,13 +179,13 @@ function handleEqualAction(state) {
 
                 return {
                     ...state,
-                    state: states.RESULT,
+                    context: contexts.RESULT,
                     operandLeft: result,
                 }
             } catch {
                 return {
                     ...state,
-                    state: states.ERROR,
+                    context: contexts.ERROR,
                     operandLeft: null,
                     operandRight: null,
                     operator: null,
@@ -198,10 +198,10 @@ function handleEqualAction(state) {
 }
 
 function handleClearAction(state) {
-    if (state.state === states.IN_INT || state.state === states.IN_FRAC || state.state === states.RESULT) {
+    if (state.context === contexts.IN_INT || state.context === contexts.IN_FRAC || state.context === contexts.RESULT) {
         return {
             ...state,
-            state: states.IN_INT,
+            context: contexts.IN_INT,
             operandRight: '0',
         };
     }
@@ -210,7 +210,7 @@ function handleClearAction(state) {
 function handleAllClearAction(state) {
     return {
         ...state,
-        state: states.INIT,
+        context: contexts.INIT,
         operandLeft: null,
         operandRight: null,
         operator: null,
@@ -218,30 +218,30 @@ function handleAllClearAction(state) {
 }
 
 function handleDotAction(state) {
-    if (state.state === states.INIT || state.state === states.PEND_R || state.state === states.PEND_OP || state.state === states.RESULT || state.state === states.ERROR ) {
+    if (state.context === contexts.INIT || state.context === contexts.PEND_R || state.context === contexts.PEND_OP || state.context === contexts.RESULT || state.context === contexts.ERROR ) {
         // RESULT → 小数点入力の場合はオペレーターをリセット
-        const operator = state.state === states.RESULT ? null : state.operator;
+        const operator = state.context === contexts.RESULT ? null : state.operator;
         return {
             ...state,
-            state: states.IN_FRAC,
+            context: contexts.IN_FRAC,
             operandRight: '0.',
             operator,
         };
     }
 
-    if (state.state === states.IN_INT) {
+    if (state.context === contexts.IN_INT) {
         return {
             ...state,
-            state: states.IN_FRAC,
+            context: contexts.IN_FRAC,
             operandRight: state.operandRight + '.',
         };
     }
 
-    if (state.state === states.IN_FRAC) {
+    if (state.context === contexts.IN_FRAC) {
         return state;
     }
 
-    if (state.state === states.INV_PLAY) {
+    if (state.context === contexts.INV_PLAY) {
         let aim = '0';
         switch(state.aim) {
             case 'n': aim = '0'; break;
@@ -259,19 +259,19 @@ function handleDotAction(state) {
 
 function handleMemoryAction(state, action) {
     const operator = action.payload.kind === 'M+' ? '+' : '-';
-    if (state.state === states.IN_INT || state.state === states.IN_FRAC || state.state === states.PEND_OP || state.state === states.RESULT ) {
+    if (state.context === contexts.IN_INT || state.context === contexts.IN_FRAC || state.context === contexts.PEND_OP || state.context === contexts.RESULT ) {
         try {
             const result = calcFormula(state.memory, state.operandRight, operator);
 
             return {
                 ...state,
-                state: states.PEND_OP,
+                context: contexts.PEND_OP,
                 memory: result,
             }
         } catch {
             return {
                 ...state,
-                state: states.ERROR,
+                context: contexts.ERROR,
                 operandLeft: null,
                 operandRight: null,
                 operator: null,
@@ -285,7 +285,7 @@ function handleMemoryAction(state, action) {
 function handleMemoryRecallAction(state) {
     return {
         ...state,
-        state: states.PEND_OP,
+        context: contexts.PEND_OP,
         operandRight: state.memory,
     }
 }
@@ -299,10 +299,10 @@ function handleMemoryClearAction(state) {
 
 function handleStartInvaderAction(state) {
     // 電卓モードの場合
-    if (state.state !== states.INV_POINT && state.state !== states.INV_PLAY) {
+    if (state.context !== contexts.INV_POINT && state.context !== contexts.INV_PLAY) {
         return {
             ...state,
-            state: states.INV_POINT,
+            context: contexts.INV_POINT,
             stage: 1,
             life: 3,
             aim: '0',
@@ -319,7 +319,7 @@ function handleStartInvaderAction(state) {
 function handlePlayInvaderAction(state) {
     return {
         ...state,
-        state: states.INV_PLAY,
+        context: contexts.INV_PLAY,
     };
 }
 
@@ -331,7 +331,7 @@ function handleTickInvaderAction(state, action) {
         if (life >0) {
             return {
                 ...state,
-                state: states.INV_POINT,
+                context: contexts.INV_POINT,
                 aim: '0',
                 enemies: '',
                 popedEnemyNum: 0,
@@ -341,7 +341,7 @@ function handleTickInvaderAction(state, action) {
         } else {
             return {
                 ...state,
-                state: states.INV_OVER,
+                context: contexts.INV_OVER,
             }
         }
     }
@@ -350,7 +350,7 @@ function handleTickInvaderAction(state, action) {
     if (state.popedEnemyNum === 16 && state.enemies.trim().length === 0) {
         return {
             ...state,
-            state: states.INV_POINT,
+            context: contexts.INV_POINT,
             stage: state.stage + 1,
             aim: '0',
             enemies: '',
@@ -385,7 +385,7 @@ function handleTickInvaderAction(state, action) {
 function handleEndInvaderAction(state) {
     return {
         ...state,
-        state: states.INIT,
+        context: contexts.INIT,
         operandLeft: null,
         operandRight: null,
         operator: null,

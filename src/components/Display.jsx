@@ -1,4 +1,4 @@
-import { states } from "../states";
+import { contexts } from "../contexts";
 import SegmentsDisplay from "./SegmentsDisplay";
 
 function drawPointInvaderDisplay(state) {
@@ -17,17 +17,17 @@ function drawPlayInvaderDisplay(state) {
 export default function Display({state}) {
     let display = '';
 
-    switch(state.state) {
-        case states.INIT      : display = '0'; break;
-        case states.IN_INT    : display = state.operandRight; break;
-        case states.IN_FRAC   : display = state.operandRight; break;
-        case states.PEND_R    : display = state.operandLeft; break;
-        case states.PEND_OP   : display = state.operandRight; break;
-        case states.RESULT    : display = state.operandLeft; break;
-        case states.ERROR     : display = 'error'; break;
-        case states.INV_POINT : display = drawPointInvaderDisplay(state); break;
-        case states.INV_PLAY  : display = drawPlayInvaderDisplay(state); break;
-        case states.INV_OVER  : display = drawPointInvaderDisplay(state); break;
+    switch(state.context) {
+        case contexts.INIT      : display = '0'; break;
+        case contexts.IN_INT    : display = state.operandRight; break;
+        case contexts.IN_FRAC   : display = state.operandRight; break;
+        case contexts.PEND_R    : display = state.operandLeft; break;
+        case contexts.PEND_OP   : display = state.operandRight; break;
+        case contexts.RESULT    : display = state.operandLeft; break;
+        case contexts.ERROR     : display = 'error'; break;
+        case contexts.INV_POINT : display = drawPointInvaderDisplay(state); break;
+        case contexts.INV_PLAY  : display = drawPlayInvaderDisplay(state); break;
+        case contexts.INV_OVER  : display = drawPointInvaderDisplay(state); break;
     }
 
     return (

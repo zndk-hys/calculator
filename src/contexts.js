@@ -1,4 +1,4 @@
-export const states = {
+export const contexts = {
     INIT: 'init',
     IN_INT: 'input_int',
     IN_FRAC: 'input_frac',
