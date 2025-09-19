@@ -6,4 +6,7 @@ export const states = {
     PEND_R: 'pend_right',
     RESULT: 'result',
     ERROR: 'error',
+    INV_POINT: 'invader_point',
+    INV_PLAY: 'invader_playing',
+    INV_OVER: 'invader_gameover'
 }

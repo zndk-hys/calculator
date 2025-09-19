@@ -18,6 +18,11 @@ export default function Segments({value, hasDot}) {
         case 'e': signals = [ true,  true, false,  true,  true, false,  true, hasDot]; break;
         case 'r': signals = [false, false, false,  true,  true, false, false, hasDot]; break;
         case 'o': signals = [false, false, false,  true,  true,  true,  true, hasDot]; break;
+
+        //invader
+        case ']': signals = [ true, false, false,  true, false, false,  true, hasDot]; break;
+        case '>': signals = [false, false, false,  true, false, false,  true, hasDot]; break;
+        case 'n': signals = [false, false, false,  true,  true,  true, false, hasDot]; break;
     }
 
     return (

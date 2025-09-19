@@ -8,6 +8,18 @@ export const initialState = {
     operandRight: null,
     operator: null,
     memory: '0',
+    length: 10,
+
+    /* インベーダー用 */
+    stage: 0,         // ステージ数
+    point: 0,         // 得点
+    enemies: '',      // 出現中の敵
+    tickCount: 0,     // tickカウンタ
+    popedEnemyNum: 0, // 出現した敵の数
+    life: 3,          // 残りライフ
+    aim: '0',         // 照準
+    sumHitNum: 0,     // ヒットした合計（UFO出現判定用）
+    comingUfo: false, // UFO出現フラグ
 };
 
 function handleNumAction(state, action) {
@@ -114,6 +126,42 @@ function handleOperatorAction(state, action) {
         }
     }
 
+    // インベーダー：fire
+    if (state.state === states.INV_PLAY && operator === '+') {
+        const aim = state.aim;
+        const enemies = state.enemies;
+        const padEnemies = enemies.padStart(state.length - 4, ' ');
+        let point = 0;
+        let hit = false;
+
+        for (let i = 0; i < padEnemies.length; i++) {
+            if (padEnemies.charAt(i) === aim) {
+                hit = true;
+                if (aim === 'n') point += 300;
+                else point += (i+1) * 10;
+            }
+        }
+
+        let sumHitNum = state.sumHitNum;
+        let comingUfo = state.comingUfo;
+        if (hit) {
+            if (aim !== 'n') {
+                sumHitNum += Number(aim);
+            }
+            if (sumHitNum % 10 === 0) {
+                comingUfo = true;
+            }
+        }
+
+        return {
+            ...state,
+            enemies: enemies.replaceAll(aim, ''),
+            point: state.point + point,
+            sumHitNum,
+            comingUfo,
+        }
+    }
+
     return state;
 }
 
@@ -193,6 +241,19 @@ function handleDotAction(state, action) {
         return state;
     }
 
+    if (state.state === states.INV_PLAY) {
+        let aim = '0';
+        switch(state.aim) {
+            case 'n': aim = '0'; break;
+            case '9': aim = 'n'; break;
+            default: aim = String(Number(state.aim) + 1);
+        }
+        return {
+            ...state,
+            aim,
+        }
+    }
+
     return state;
 }
 
@@ -236,6 +297,88 @@ function handleMemoryClearAction(state, action) {
     }
 }
 
+function handleStartInvaderAction(state) {
+
+    if (state.state !== states.INV_POINT && state.state !== states.INV_PLAY) {
+        return {
+            ...state,
+            state: states.INV_POINT,
+            stage: 1,
+            life: 3,
+            aim: '0',
+            enemies: '',
+            popedEnemyNum: 0,
+        }
+    }
+
+    return {
+        ...state,
+        state: states.INV_POINT,
+    }
+}
+
+function handlePlayInvaderAction(state) {
+    return {
+        ...state,
+        state: states.INV_PLAY,
+    };
+}
+
+function handleTickInvaderAction(state, action) {
+    if (state.enemies.length === state.length - 4) {
+        const life = state.life - 1;
+
+        if (life >0) {
+            return {
+                ...state,
+                state: states.INV_POINT,
+                aim: '0',
+                enemies: '',
+                popedEnemyNum: 0,
+                sumHitNum: 0,
+                life: state.life - 1,
+            }
+        } else {
+            return {
+                ...state,
+                state: states.INV_OVER,
+            }
+        }
+    }
+
+    // 敵排出
+    let enemies = state.enemies;
+    let popedEnemyNum = state.popedEnemyNum;
+    if (popedEnemyNum < 16) {
+        if (state.comingUfo) {
+            enemies += 'n';
+        } else {
+            enemies += action.payload.newEnemy;
+        }
+        popedEnemyNum++;
+    } else {
+        enemies += ' ';
+    }
+
+    return {
+        ...state,
+        tickCount: state.tickCount++,
+        enemies,
+        popedEnemyNum,
+        comingUfo: false,
+    };
+}
+
+function handleEndInvaderAction(state) {
+    return {
+        ...state,
+        state: states.INIT,
+        operandLeft: null,
+        operandRight: null,
+        operator: null,
+    };
+}
+
 /**
  * |desc\src   |init       |input_int  |input_franc|pend_op    |pend_right |result     |error      |
  * |init       |o          |o          |o          |o          |o          |o          |o          |
@@ -261,5 +404,9 @@ export function calcReducer(state, action) {
         case actions.MEM        : return handleMemoryAction(state, action);
         case actions.MEM_RECALL : return handleMemoryRecallAction(state, action);
         case actions.MEM_CLEAR  : return handleMemoryClearAction(state, action);
+        case actions.INV_START  : return handleStartInvaderAction(state);
+        case actions.INV_PLAY   : return handlePlayInvaderAction(state);
+        case actions.INV_TICK   : return handleTickInvaderAction(state, action);
+        case actions.INV_END    : return handleEndInvaderAction(state);
     }
 }
