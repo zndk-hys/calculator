@@ -28,7 +28,7 @@ export default function calcuratorReducer(state: State, action: AppAction): Stat
 }
 
 function handleNumAction(state: State, action: NumAction): State {
-    const inputNum = String(action.payload.kind);
+    const inputNum = action.payload.kind;
         
     if (state.context !== contexts.IN_INT && state.context !== contexts.IN_FRAC) {
         // 未入力時
@@ -40,7 +40,7 @@ function handleNumAction(state: State, action: NumAction): State {
             calcurator: {
                 ...state.calcurator,
                 contextOffer: contexts.IN_INT,
-                operandRight: inputNum,
+                operandRight: (inputNum === '00') ? '0' : inputNum,
                 operator,
             }
         };
@@ -48,12 +48,22 @@ function handleNumAction(state: State, action: NumAction): State {
     } else {
         // 追加入力時
 
+        let newVal = state.calcurator.operandRight;
+        if (state.calcurator.operandRight === '0') {
+            if (inputNum === '00') {
+                newVal = '0';
+            } else {
+                newVal = inputNum;
+            }
+        } else {
+            newVal += inputNum;
+        }
+
         // 最大桁数以上の入力は無効
-        if ( numLength(state.calcurator.operandRight!) >= state.displayLength ) {
+        if ( numLength(newVal!) > state.displayLength ) {
             return state;
         }
 
-        const newVal = state.calcurator.operandRight === '0' ? inputNum : state.calcurator.operandRight + inputNum;
         return {
             ...state,
             calcurator: {

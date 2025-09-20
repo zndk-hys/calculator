@@ -20,6 +20,7 @@ export default function Keypad({dispatch}: KeypadProps) {
 
     return (
         <div>
+            <input type="button" value="00" onClick={onNum} />
             <input type="button" value="0" onClick={onNum} />
             <input type="button" value="1" onClick={onNum} />
             <input type="button" value="2" onClick={onNum} />
