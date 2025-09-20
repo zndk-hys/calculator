@@ -30,5 +30,6 @@ export function isInvaderContext(state: State): boolean {
         contexts.INV_POINT,
         contexts.INV_PLAY,
         contexts.INV_POINT,
+        contexts.INV_OVER,
     ].includes(state.context);
 }

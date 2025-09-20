@@ -15,6 +15,7 @@ export default function invaderReducer(state: State, action: AppAction) {
         case actions.INV_START : return handleStartInvaderAction(state);
         case actions.INV_PLAY  : return handlePlayInvaderAction(state);
         case actions.INV_TICK  : return handleTickInvaderAction(state, action as InvTickAction);
+        case actions.INV_END   : return handleEndInvaderAction(state);
         case actions.DOT       : return handleDotAction(state);
         case actions.OP        : return handleOperatorAction(state, action as OperatorAction);
         case actions.All_CLEAR : return handleAllClearAction(state);
@@ -91,6 +92,7 @@ function handleTickInvaderAction(state: State, action: InvTickAction): State {
                 enemies: '',
                 popedEnemyNum: 0,
                 sumHitNum: 0,
+                comingUfo: false,
             }
         }
     }
@@ -186,6 +188,16 @@ function handleOperatorAction(state: State, action: OperatorAction): State {
 }
 
 function handleAllClearAction(state: State): State {
+    return {
+        ...state,
+        invader: {
+            ...state.invader,
+            contextOffer: contexts.INIT,
+        }
+    };
+}
+
+function handleEndInvaderAction(state: State): State {
     return {
         ...state,
         invader: {

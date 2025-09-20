@@ -41,7 +41,7 @@ export default function useInvaderGame(state: State, dispatch: React.ActionDispa
         if ( state.context === contexts.INV_OVER ) {
             const timerId = setTimeout(() => {
                 dispatch({type: actions.INV_END});
-            }, 1000);
+            }, 2000);
 
             return () => {
                 if (timerId) clearTimeout(timerId);

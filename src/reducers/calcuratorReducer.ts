@@ -23,7 +23,6 @@ export default function calcuratorReducer(state: State, action: AppAction): Stat
         case actions.MEM_RECALL : return handleMemoryRecallAction(state);
         case actions.MEM_CLEAR  : return handleMemoryClearAction(state);
         case actions.INV_START  : return handleStartInvaderAction(state);
-        case actions.INV_END    : return handleEndInvaderAction(state);
         default: return state;
     }
 }
