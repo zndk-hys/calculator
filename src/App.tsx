@@ -4,7 +4,7 @@ import Calc from './components/Calc.js'
 function App() {
   return (
     <>
-      <Calc length={10} />
+      <Calc displayLength={10} />
     </>
   )
 }

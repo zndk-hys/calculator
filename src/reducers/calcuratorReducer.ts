@@ -1,9 +1,17 @@
 import { actions } from "../actions";
-import { contexts } from "../contexts";
+import { contexts, isInvaderContext } from "../contexts";
 import { calcFormula, numLength } from "../utils";
 import { State, AppAction, NumAction, OperatorAction, MemoryAction } from "../types";
 
 export default function calcuratorReducer(state: State, action: AppAction): State {
+    // インベーダーゲームモードの場合はINV_ENDのみ受付け
+    if (isInvaderContext(state)) {
+        if (action.type === actions.INV_END) {
+            return handleEndInvaderAction(state);
+        }
+        return state;
+    }
+
     switch (action.type) {
         case actions.NUM        : return handleNumAction(state, action as NumAction);
         case actions.CLEAR      : return handleClearAction(state);
@@ -14,7 +22,8 @@ export default function calcuratorReducer(state: State, action: AppAction): Stat
         case actions.MEM        : return handleMemoryAction(state, action as MemoryAction);
         case actions.MEM_RECALL : return handleMemoryRecallAction(state);
         case actions.MEM_CLEAR  : return handleMemoryClearAction(state);
-        case actions.INV_START : return handleStartInvaderAction(state);
+        case actions.INV_START  : return handleStartInvaderAction(state);
+        case actions.INV_END    : return handleEndInvaderAction(state);
         default: return state;
     }
 }
@@ -26,26 +35,32 @@ function handleNumAction(state: State, action: NumAction): State {
         // 未入力時
 
         // RESULT → 数値入力の場合はオペレーターをリセット
-        const operator = state.context === contexts.RESULT ? null : state.operator;
+        const operator = state.context === contexts.RESULT ? null : state.calcurator.operator;
         return {
             ...state,
-            context: contexts.IN_INT,
-            operandRight: inputNum,
-            operator,
+            calcurator: {
+                ...state.calcurator,
+                contextOffer: contexts.IN_INT,
+                operandRight: inputNum,
+                operator,
+            }
         };
 
     } else {
         // 追加入力時
 
         // 最大桁数以上の入力は無効
-        if ( numLength(state.operandRight!) >= state.length ) {
+        if ( numLength(state.calcurator.operandRight!) >= state.displayLength ) {
             return state;
         }
 
-        const newVal = state.operandRight === '0' ? inputNum : state.operandRight + inputNum;
+        const newVal = state.calcurator.operandRight === '0' ? inputNum : state.calcurator.operandRight + inputNum;
         return {
             ...state,
-            operandRight: newVal,
+            calcurator: {
+                ...state.calcurator,
+                operandRight: newVal,
+            }
         };
     }
 }
@@ -59,16 +74,22 @@ function handleOperatorAction(state: State, action: OperatorAction): State {
         if ( operator === '-' ) {
             return {
                 ...state,
-                context: contexts.IN_INT,
-                operandRight: '-',
+                calcurator: {
+                    ...state.calcurator,
+                    contextOffer: contexts.IN_INT,
+                    operandRight: '-',
+                }
             }
         }
         return {
             ...state,
-            context: contexts.PEND_R,
-            operandLeft: '0',
-            operandRight: null,
-            operator,
+            calcurator: {
+                ...state.calcurator,
+                contextOffer: contexts.PEND_R,
+                operandLeft: '0',
+                operandRight: null,
+                operator,
+            }
         }
     }
 
@@ -76,45 +97,57 @@ function handleOperatorAction(state: State, action: OperatorAction): State {
     if (state.context === contexts.RESULT) {
         return {
             ...state,
-            context: contexts.PEND_R,
-            operator,
+            calcurator: {
+                ...state.calcurator,
+                contextOffer: contexts.PEND_R,
+                operator,
+            }
         }
     }
 
     // 入力中またはメモリ取得後の状態では全てのオペレータを許容し、必要であれば計算
     if (state.context === contexts.IN_INT || state.context === contexts.IN_FRAC || state.context === contexts.PEND_OP ) {
-        let newOperandLeft = state.operandRight;
-        if ( state.operandLeft && state.operandRight && state.operator ) {
+        let newOperandLeft = state.calcurator.operandRight;
+        if ( state.calcurator.operandLeft && state.calcurator.operandRight && state.calcurator.operator ) {
             try {
-                newOperandLeft = calcFormula(state.operandLeft, state.operandRight, state.operator);
-                if ( numLength( newOperandLeft ) > state.length ) {
+                newOperandLeft = calcFormula(state.calcurator.operandLeft, state.calcurator.operandRight, state.calcurator.operator);
+                if ( numLength( newOperandLeft ) > state.displayLength ) {
                     throw new Error('too long');
                 }
 
                 return {
                     ...state,
-                    context: contexts.PEND_R,
-                    operandLeft: newOperandLeft,
-                    operandRight: null,
-                    operator,
+                    calcurator: {
+                        ...state.calcurator,
+                        contextOffer: contexts.PEND_R,
+                        operandLeft: newOperandLeft,
+                        operandRight: null,
+                        operator,
+                    }
                 }
             } catch {
                 return {
                     ...state,
-                    context: contexts.ERROR,
-                    operandLeft: null,
-                    operandRight: null,
-                    operator: null,
+                    calcurator: {
+                        ...state.calcurator,
+                        contextOffer: contexts.ERROR,
+                        operandLeft: null,
+                        operandRight: null,
+                        operator: null,
+                    }
                 }
             }
         }
 
         return {
             ...state,
-            context: contexts.PEND_R,
-            operandLeft: newOperandLeft,
-            operandRight: null,
-            operator,
+            calcurator: {
+                ...state.calcurator,
+                contextOffer: contexts.PEND_R,
+                operandLeft: newOperandLeft,
+                operandRight: null,
+                operator,
+            }
         }
     }
 
@@ -123,8 +156,11 @@ function handleOperatorAction(state: State, action: OperatorAction): State {
         if ( operator === '-' ) {
             return {
                 ...state,
-                context: contexts.IN_INT,
-                operandRight: '-',
+                calcurator: {
+                    ...state.calcurator,
+                    contextOffer: contexts.IN_INT,
+                    operandRight: '-',
+                }
             }
         }
     }
@@ -134,28 +170,34 @@ function handleOperatorAction(state: State, action: OperatorAction): State {
 
 function handleEqualAction(state: State): State {
     if (state.context === contexts.IN_INT || state.context === contexts.IN_FRAC || state.context === contexts.PEND_OP || state.context === contexts.RESULT) {
-        if ( state.operandRight === '-' ) return state;
+        if ( state.calcurator.operandRight === '-' ) return state;
         
-        if ( state.operandLeft && state.operandRight && state.operator ) {
+        if ( state.calcurator.operandLeft && state.calcurator.operandRight && state.calcurator.operator ) {
             try {
-                const result = calcFormula(state.operandLeft, state.operandRight, state.operator);
+                const result = calcFormula(state.calcurator.operandLeft, state.calcurator.operandRight, state.calcurator.operator);
 
-                if ( numLength( result ) > state.length ) {
+                if ( numLength( result ) > state.displayLength ) {
                     throw new Error('too long');
                 }
 
                 return {
                     ...state,
-                    context: contexts.RESULT,
-                    operandLeft: result,
+                    calcurator: {
+                        ...state.calcurator,
+                        contextOffer: contexts.RESULT,
+                        operandLeft: result,
+                    }
                 }
             } catch {
                 return {
                     ...state,
-                    context: contexts.ERROR,
-                    operandLeft: null,
-                    operandRight: null,
-                    operator: null,
+                    calcurator: {
+                        ...state.calcurator,
+                        contextOffer: contexts.ERROR,
+                        operandLeft: null,
+                        operandRight: null,
+                        operator: null,
+                    }
                 }
             }
         }
@@ -168,8 +210,11 @@ function handleClearAction(state: State): State {
     if (state.context === contexts.IN_INT || state.context === contexts.IN_FRAC || state.context === contexts.RESULT) {
         return {
             ...state,
-            context: contexts.IN_INT,
-            operandRight: '0',
+            calcurator: {
+                ...state.calcurator,
+                contextOffer: contexts.IN_INT,
+                operandRight: '0',
+            }
         };
     }
 
@@ -179,10 +224,13 @@ function handleClearAction(state: State): State {
 function handleAllClearAction(state: State): State {
     return {
         ...state,
-        context: contexts.INIT,
-        operandLeft: null,
-        operandRight: null,
-        operator: null,
+        calcurator: {
+            ...state.calcurator,
+            contextOffer: contexts.INIT,
+            operandLeft: null,
+            operandRight: null,
+            operator: null,
+        }
     };
 }
 
@@ -190,21 +238,27 @@ function handleDotAction(state: State): State {
     // 未入力状態で.を押した際は「0.」として扱う
     if (state.context === contexts.INIT || state.context === contexts.PEND_R || state.context === contexts.PEND_OP || state.context === contexts.RESULT || state.context === contexts.ERROR ) {
         // RESULT → 小数点入力の場合はオペレーターをリセット
-        const operator = state.context === contexts.RESULT ? null : state.operator;
+        const operator = state.context === contexts.RESULT ? null : state.calcurator.operator;
 
         return {
             ...state,
-            context: contexts.IN_FRAC,
-            operandRight: '0.',
-            operator,
+            calcurator: {
+                ...state.calcurator,
+                contextOffer: contexts.IN_FRAC,
+                operandRight: '0.',
+                operator,
+            }
         };
     }
 
     if (state.context === contexts.IN_INT) {
         return {
             ...state,
-            context: contexts.IN_FRAC,
-            operandRight: state.operandRight + '.',
+            calcurator: {
+                ...state.calcurator,
+                contextOffer: contexts.IN_FRAC,
+                operandRight: state.calcurator.operandRight + '.',
+            }
         };
     }
 
@@ -215,22 +269,28 @@ function handleMemoryAction(state: State, action: MemoryAction): State {
     const operator = action.payload.kind === 'M+' ? '+' : '-';
     if (state.context === contexts.IN_INT || state.context === contexts.IN_FRAC || state.context === contexts.PEND_OP || state.context === contexts.RESULT ) {
         try {
-            if ( state.operandRight ) {
-                const result = calcFormula(state.memory, state.operandRight, operator);
+            if ( state.calcurator.operandRight ) {
+                const result = calcFormula(state.calcurator.memory, state.calcurator.operandRight, operator);
     
                 return {
                     ...state,
-                    context: contexts.PEND_OP,
-                    memory: result,
+                    calcurator: {
+                        ...state.calcurator,
+                        contextOffer: contexts.PEND_OP,
+                        memory: result,
+                    }
                 }
             }
         } catch {
             return {
                 ...state,
-                context: contexts.ERROR,
-                operandLeft: null,
-                operandRight: null,
-                operator: null,
+                calcurator: {
+                    ...state.calcurator,
+                    contextOffer: contexts.ERROR,
+                    operandLeft: null,
+                    operandRight: null,
+                    operator: null,
+                }
             }
         }
     }
@@ -241,28 +301,50 @@ function handleMemoryAction(state: State, action: MemoryAction): State {
 function handleMemoryRecallAction(state: State): State {
     return {
         ...state,
-        context: contexts.PEND_OP,
-        operandRight: state.memory,
+        calcurator: {
+            ...state.calcurator,
+            contextOffer: contexts.PEND_OP,
+            operandRight: state.calcurator.memory,
+        }
     }
 }
 
 function handleMemoryClearAction(state: State): State {
     return {
         ...state,
-        memory: '0',
+        calcurator: {
+            ...state.calcurator,
+            memory: '0',
+        }
     }
 }
 
 function handleStartInvaderAction(state: State): State {
+    // インベーダーゲーム中は無視
+    if ( isInvaderContext( state ) ) {
+        return state;
+    }
+
+    // インベーダーゲーム関連の状態を初期化
     return {
         ...state,
-        context: contexts.INV_POINT,
-        stage: 1,
-        life: 3,
-        aim: '0',
-        enemies: '',
-        popedEnemyNum: 0,
-        point: 0,
-        comingUfo: false,
+        calcurator: {
+            ...state.calcurator,
+            contextOffer: contexts.INV_POINT,
+        }
     }
+}
+
+function handleEndInvaderAction(state: State): State {
+    // 電卓関連の状態を初期化
+    return {
+        ...state,
+        calcurator: {
+            ...state.calcurator,
+            contextOffer: contexts.INIT,
+            operandLeft: null,
+            operandRight: null,
+            operator: null,
+        }
+    };
 }

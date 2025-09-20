@@ -18,22 +18,28 @@ type StateContext =
 
 export interface State {
     context: StateContext,
-    operandLeft: string | null,
-    operandRight: string | null,
-    operator: Operator | null,
-    memory: string,
-    length: number,
+    displayLength: number,
 
-    /* インベーダー用 */
-    stage: number,         // ステージ数
-    point: number,         // 得点
-    enemies: string,      // 出現中の敵
-    tickCount: number,     // tickカウンタ
-    popedEnemyNum: number, // 出現した敵の数
-    life: number,          // 残りライフ
-    aim: string,         // 照準
-    sumHitNum: number,     // ヒットした合計（UFO出現判定用）
-    comingUfo: boolean, // UFO出現フラグ
+    calcurator: {
+        contextOffer: StateContext | null,
+        operandLeft: string | null,
+        operandRight: string | null,
+        operator: Operator | null,
+        memory: string,
+    },
+
+    invader: {
+        contextOffer: StateContext | null
+        stage: number,         // ステージ数
+        point: number,         // 得点
+        enemies: string,       // 出現中の敵
+        tickCount: number,     // tickカウンタ
+        popedEnemyNum: number, // 出現した敵の数
+        life: number,          // 残りライフ
+        aim: string,           // 照準
+        sumHitNum: number,     // ヒットした合計（UFO出現判定用）
+        comingUfo: boolean,    // UFO出現フラグ
+    }
 }
 
 export type NumAction = {type: typeof actions.NUM, payload: {kind: string }};

@@ -1,12 +1,20 @@
 import { actions } from "../actions";
-import { contexts } from "../contexts";
+import { contexts, isCalculatorContext } from "../contexts";
 import { AppAction, InvTickAction, OperatorAction, State } from "../types";
 
 export default function invaderReducer(state: State, action: AppAction) {
+    // 電卓モードの時はINV_STARTのみ受付け
+    if (isCalculatorContext(state)) {
+        if (action.type === actions.INV_START) {
+            return handleStartInvaderAction(state);
+        }
+        return state;
+    }
+
     switch (action.type) {
+        case actions.INV_START : return handleStartInvaderAction(state);
         case actions.INV_PLAY  : return handlePlayInvaderAction(state);
         case actions.INV_TICK  : return handleTickInvaderAction(state, action as InvTickAction);
-        case actions.INV_END   : return handleEndInvaderAction(state);
         case actions.DOT       : return handleDotAction(state);
         case actions.OP        : return handleOperatorAction(state, action as OperatorAction);
         case actions.All_CLEAR : return handleAllClearAction(state);
@@ -14,54 +22,84 @@ export default function invaderReducer(state: State, action: AppAction) {
     }
 }
 
+function handleStartInvaderAction(state: State): State {
+    // インベーダーゲーム関連の状態を初期化
+    return {
+        ...state,
+        invader: {
+            ...state.invader,
+            contextOffer: contexts.INV_POINT,
+            stage: 1,
+            life: 3,
+            aim: '0',
+            enemies: '',
+            popedEnemyNum: 0,
+            point: 0,
+            comingUfo: false,
+        }
+    }
+}
+
 function handlePlayInvaderAction(state: State): State {
     return {
         ...state,
-        context: contexts.INV_PLAY,
+        invader: {
+            ...state.invader,
+            contextOffer: contexts.INV_PLAY,
+        }
     };
 }
 
 function handleTickInvaderAction(state: State, action: InvTickAction): State {
     // 負け
-    if (state.enemies.length === state.length - 4) {
-        const life = state.life - 1;
+    if (state.invader.enemies.length === state.displayLength - 4) {
+        const life = state.invader.life - 1;
 
         if (life >0) {
             return {
                 ...state,
-                context: contexts.INV_POINT,
-                aim: '0',
-                enemies: '',
-                popedEnemyNum: 0,
-                sumHitNum: 0,
-                life: state.life - 1,
+                invader: {
+                    ...state.invader,
+                    contextOffer: contexts.INV_POINT,
+                    aim: '0',
+                    enemies: '',
+                    popedEnemyNum: 0,
+                    sumHitNum: 0,
+                    life: state.invader.life - 1,
+                }
             }
         } else {
             return {
                 ...state,
-                context: contexts.INV_OVER,
+                invader: {
+                    ...state.invader,
+                    contextOffer: contexts.INV_OVER,
+                }
             }
         }
     }
 
     // 勝ち
-    if (state.popedEnemyNum === 16 && state.enemies.trim().length === 0) {
+    if (state.invader.popedEnemyNum === 16 && state.invader.enemies.trim().length === 0) {
         return {
             ...state,
-            context: contexts.INV_POINT,
-            stage: state.stage + 1,
-            aim: '0',
-            enemies: '',
-            popedEnemyNum: 0,
-            sumHitNum: 0,
+            invader: {
+                ...state.invader,
+                contextOffer: contexts.INV_POINT,
+                stage: state.invader.stage + 1,
+                aim: '0',
+                enemies: '',
+                popedEnemyNum: 0,
+                sumHitNum: 0,
+            }
         }
     }
 
     // 敵排出
-    let enemies = state.enemies;
-    let popedEnemyNum = state.popedEnemyNum;
+    let enemies = state.invader.enemies;
+    let popedEnemyNum = state.invader.popedEnemyNum;
     if (popedEnemyNum < 16) {
-        if (state.comingUfo) {
+        if (state.invader.comingUfo) {
             enemies += 'n';
         } else {
             enemies += action.payload.newEnemy;
@@ -73,47 +111,43 @@ function handleTickInvaderAction(state: State, action: InvTickAction): State {
 
     return {
         ...state,
-        tickCount: state.tickCount++,
-        enemies,
-        popedEnemyNum,
-        comingUfo: false,
-    };
-}
-
-function handleEndInvaderAction(state: State): State {
-    return {
-        ...state,
-        context: contexts.INIT,
-        operandLeft: null,
-        operandRight: null,
-        operator: null,
+        invader: {
+            ...state.invader,
+            tickCount: state.invader.tickCount++,
+            enemies,
+            popedEnemyNum,
+            comingUfo: false,
+        }
     };
 }
 
 function handleDotAction(state: State): State {
     if (state.context === contexts.INV_PLAY) {
         let aim = '0';
-        switch(state.aim) {
+        switch(state.invader.aim) {
             case 'n': aim = '0'; break;
             case '9': aim = 'n'; break;
-            default: aim = String(Number(state.aim) + 1);
+            default: aim = String(Number(state.invader.aim) + 1);
         }
         return {
             ...state,
-            aim,
+            invader: {
+                ...state.invader,
+                aim,
+            }
         }
     }
 
     return state;
 }
 
-function handleOperatorAction(state: State, action: OperatorAction) {
+function handleOperatorAction(state: State, action: OperatorAction): State {
     const operator = action.payload.kind;
 
     if (state.context === contexts.INV_PLAY && operator === '+') {
-        const aim = state.aim;
-        const enemies = state.enemies;
-        const padEnemies = enemies.padStart(state.length - 4, ' ');
+        const aim = state.invader.aim;
+        const enemies = state.invader.enemies;
+        const padEnemies = enemies.padStart(state.displayLength - 4, ' ');
         let point = 0;
         let hit = false;
 
@@ -125,8 +159,8 @@ function handleOperatorAction(state: State, action: OperatorAction) {
             }
         }
 
-        let sumHitNum = state.sumHitNum;
-        let comingUfo = state.comingUfo;
+        let sumHitNum = state.invader.sumHitNum;
+        let comingUfo = state.invader.comingUfo;
         if (hit) {
             if (aim !== 'n') {
                 sumHitNum += Number(aim);
@@ -138,22 +172,25 @@ function handleOperatorAction(state: State, action: OperatorAction) {
 
         return {
             ...state,
-            enemies: enemies.replaceAll(aim, ''),
-            point: state.point + point,
-            sumHitNum,
-            comingUfo,
+            invader: {
+                ...state.invader,
+                enemies: enemies.replaceAll(aim, ''),
+                point: state.invader.point + point,
+                sumHitNum,
+                comingUfo,
+            }
         }
     }
 
     return state;
 }
 
-function handleAllClearAction(state: State) {
+function handleAllClearAction(state: State): State {
     return {
         ...state,
-        context: contexts.INIT,
-        operandLeft: null,
-        operandRight: null,
-        operator: null,
+        invader: {
+            ...state.invader,
+            contextOffer: contexts.INIT,
+        }
     };
 }

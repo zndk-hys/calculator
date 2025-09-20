@@ -6,13 +6,13 @@ import initialState from '../initialState';
 import rootReducer from '../reducers/rootReducer';
 
 type CalcProps = {
-    length: number;
+    displayLength: number;
 }
 
-export default function Calc({length}: CalcProps) {
+export default function Calc({displayLength}: CalcProps) {
     const [state, dispatch] = useReducer(rootReducer, {
         ...initialState,
-        length,
+        displayLength,
     });
 
     // インベーダーゲーム用処理
@@ -24,12 +24,12 @@ export default function Calc({length}: CalcProps) {
             <Keypad dispatch={dispatch} />
             <div>
                 context: {state.context}<br />
-                operandLeft: {state.operandLeft}<br />
-                operandRight: {state.operandRight}<br />
-                operator: {state.operator}<br />
-                memory: {state.memory}<br />
-                point: {state.point}<br />
-                popedEnemyNum: {state.popedEnemyNum}
+                operandLeft: {state.calcurator.operandLeft}<br />
+                operandRight: {state.calcurator.operandRight}<br />
+                operator: {state.calcurator.operator}<br />
+                memory: {state.calcurator.memory}<br />
+                point: {state.invader.point}<br />
+                popedEnemyNum: {state.invader.popedEnemyNum}
             </div>
         </div>
     );

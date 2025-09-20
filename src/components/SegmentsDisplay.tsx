@@ -3,10 +3,10 @@ import Segments from "./Segments";
 
 type SegmentsDisplayProps = {
     value: string;
-    length: number;
+    displayLength: number;
 }
 
-export default function SegmentsDisplay({value, length}: SegmentsDisplayProps) {
+export default function SegmentsDisplay({value, displayLength: length}: SegmentsDisplayProps) {
     const values = convertSegmentValues(value, length);
 
     const segments = values.map((val, i) => {
