@@ -6,6 +6,7 @@
     display: flex;
     gap: 3px;
     background: #fafafa;
+    padding: 10px;
 }
 
 .segments {

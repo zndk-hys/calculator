@@ -1,0 +1,40 @@
+.nums {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1px;
+    border-top: solid 1px #bbb;
+    background: #bbb;
+}
+
+.plus {
+    grid-column: 4 / 5;
+    grid-row: 4 / 6;
+}
+
+.btn {
+    border: none;
+    background: #fff;
+    padding: 10px 0;
+    cursor: pointer;
+    font-family: "Google Sans Code", monospace;
+    font-weight: 600;
+    font-size: 15px;
+    color: #444;
+    letter-spacing: .06em;
+}
+
+.btn:hover {
+    background: #fafafa;
+}
+
+.ac {
+    color: #ec6363;
+}
+
+.c {
+    color: #dda81d;
+}
+
+.game {
+    color: #b178c1;
+}

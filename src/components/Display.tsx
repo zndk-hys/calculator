@@ -24,7 +24,6 @@ export default function Display({state}: DisplayProps) {
 
     return (
         <>
-            <p>{display}</p>
             <SegmentsDisplay value={display} displayLength={state.displayLength} />
         </>
     )

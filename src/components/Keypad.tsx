@@ -1,3 +1,4 @@
+import './Keypad.css'
 import { MouseEvent } from "react";
 import { actions } from "../actions";
 import { AppAction } from "../types";
@@ -20,30 +21,36 @@ export default function Keypad({dispatch}: KeypadProps) {
 
     return (
         <div>
-            <input type="button" value="00" onClick={onNum} />
-            <input type="button" value="0" onClick={onNum} />
-            <input type="button" value="1" onClick={onNum} />
-            <input type="button" value="2" onClick={onNum} />
-            <input type="button" value="3" onClick={onNum} />
-            <input type="button" value="4" onClick={onNum} />
-            <input type="button" value="5" onClick={onNum} />
-            <input type="button" value="6" onClick={onNum} />
-            <input type="button" value="7" onClick={onNum} />
-            <input type="button" value="8" onClick={onNum} />
-            <input type="button" value="9" onClick={onNum} />
-            <input type="button" value="C" onClick={onClear} />
-            <input type="button" value="AC" onClick={onAllClear} /><br />
-            <input type="button" value="." onClick={onDot} /><br />
-            <input type="button" value="+" onClick={onOperator} />
-            <input type="button" value="-" onClick={onOperator} />
-            <input type="button" value="*" onClick={onOperator} />
-            <input type="button" value="/" onClick={onOperator} /><br />
-            <input type="button" value="M+" onClick={onMemory} />
-            <input type="button" value="M-" onClick={onMemory} />
-            <input type="button" value="MR" onClick={onMemoryRecall} />
-            <input type="button" value="MC" onClick={onMemoryClear} /><br />
-            <input type="button" value="=" onClick={onEqual} /><br />
-            <input type="button" value="invader" onClick={onStartInvader} />
+            <div className="nums">
+                <input type="button" className="btn game" value="Game" onClick={onStartInvader} />
+                <input type="button" className="btn" value="M+" onClick={onMemory} />
+                <input type="button" className="btn" value="M-" onClick={onMemory} />
+                <input type="button" className="btn" value="MR" onClick={onMemoryRecall} />
+                <input type="button" className="btn" value="MC" onClick={onMemoryClear} />
+
+                <input type="button" className="btn" value="7" onClick={onNum} />
+                <input type="button" className="btn" value="8" onClick={onNum} />
+                <input type="button" className="btn" value="9" onClick={onNum} />
+                <input type="button" className="btn c" value="C" onClick={onClear} />
+                <input type="button" className="btn ac" value="AC" onClick={onAllClear} />
+
+                <input type="button" className="btn" value="4" onClick={onNum} />
+                <input type="button" className="btn" value="5" onClick={onNum} />
+                <input type="button" className="btn" value="6" onClick={onNum} />
+                <input type="button" className="btn" value="*" onClick={onOperator} />
+                <input type="button" className="btn" value="/" onClick={onOperator} />
+
+                <input type="button" className="btn" value="1" onClick={onNum} />
+                <input type="button" className="btn" value="2" onClick={onNum} />
+                <input type="button" className="btn" value="3" onClick={onNum} />
+                <input type="button" className="btn plus" value="+" onClick={onOperator} />
+                <input type="button" className="btn" value="-" onClick={onOperator} />
+
+                <input type="button" className="btn" value="0" onClick={onNum} />
+                <input type="button" className="btn" value="00" onClick={onNum} />
+                <input type="button" className="btn" value="." onClick={onDot} />
+                <input type="button" className="btn" value="=" onClick={onEqual} />
+            </div>
         </div>
     )
 }

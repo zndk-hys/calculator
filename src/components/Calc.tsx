@@ -1,3 +1,4 @@
+import './Calc.css';
 import { useReducer } from 'react';
 import Display from './Display';
 import Keypad from './Keypad';
@@ -19,18 +20,9 @@ export default function Calc({displayLength}: CalcProps) {
     useInvaderGame(state, dispatch);
     
     return (
-        <div>
+        <div className="calc">
             <Display state={state} />
             <Keypad dispatch={dispatch} />
-            <div>
-                context: {state.context}<br />
-                operandLeft: {state.calcurator.operandLeft}<br />
-                operandRight: {state.calcurator.operandRight}<br />
-                operator: {state.calcurator.operator}<br />
-                memory: {state.calcurator.memory}<br />
-                point: {state.invader.point}<br />
-                popedEnemyNum: {state.invader.popedEnemyNum}
-            </div>
         </div>
     );
 }
