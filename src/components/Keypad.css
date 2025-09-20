@@ -12,6 +12,9 @@
 }
 
 .btn {
+    appearance: none;
+    outline: none;
+    border-radius: 0;
     border: none;
     background: #fff;
     padding: 10px 0;
